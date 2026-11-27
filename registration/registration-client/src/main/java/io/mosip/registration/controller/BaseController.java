@@ -1415,7 +1415,8 @@ public class BaseController {
 	}
 
 	public String getCssName() {
-		return cssTheme == null || cssTheme.isBlank() ? "application.css" : String.format("application-%s.css", cssTheme);
+		// CEIN: the CEIN theme is the default; mosip.registration.css.theme can still select another one
+		return cssTheme == null || cssTheme.isBlank() ? "application-cein.css" : String.format("application-%s.css", cssTheme);
 	}
 
 	protected String getLocalZoneTime(String time) {

@@ -1,0 +1,309 @@
+/* =====================================================================
+   CEIN theme - overrides appended after the colour-mapped MOSIP base
+   (application.css). Generated into application-cein.css by
+   tools/theme/gen-theme.py. Edit this file, then regenerate.
+   ===================================================================== */
+
+@font-face { font-family: 'Inter'; src: url('fonts/Inter-Regular.ttf'); }
+@font-face { font-family: 'Inter Medium'; src: url('fonts/Inter-Medium.ttf'); }
+@font-face { font-family: 'Inter SemiBold'; src: url('fonts/Inter-SemiBold.ttf'); }
+@font-face { font-family: 'Inter'; src: url('fonts/Inter-Bold.ttf'); font-weight: bold; }
+@font-face { font-family: 'Space Grotesk SemiBold'; src: url('fonts/SpaceGrotesk-SemiBold.ttf'); }
+@font-face { font-family: 'Space Grotesk'; src: url('fonts/SpaceGrotesk-Bold.ttf'); font-weight: bold; }
+
+/* ---------- tokens ---------- */
+.root {
+	-cein-green: #006B33;
+	-cein-green-dark: #00532A;
+	-cein-green-light: #E6F2EB;
+	-cein-green-hover: #005A2B;
+	-cein-ink: #0E1A24;
+	-cein-ink-2: #2E3B47;
+	-cein-muted: #4A5866;
+	-cein-border: #C4CED6;
+	-cein-line: #DCE3E8;
+	-cein-line-soft: #EEF1F3;
+	-cein-bg: #F4F6F5;
+	-cein-error: #B3261E;
+	-cein-error-border: #E3B9B6;
+	-cein-warning: #8A5300;
+	-cein-flag-green: #00853F;
+	-cein-flag-yellow: #FDEF42;
+	-cein-flag-red: #E31B23;
+
+	-fx-font-family: 'Inter';
+	-fx-font-size: 14px;
+	-fx-base: #F4F6F5;
+	-fx-accent: #006B33;
+	-fx-default-button: #006B33;
+	-fx-focus-color: #006B33;
+	-fx-faint-focus-color: rgba(0, 107, 51, 0.18);
+	-fx-selection-bar: #E6F2EB;
+	-fx-selection-bar-non-focused: #EEF1F3;
+	-fx-text-base-color: #0E1A24;
+	-fx-text-background-color: #0E1A24;
+	-fx-mark-color: #006B33;
+}
+
+/* ---------- typography ---------- */
+.operationalTitle, .mainHeader, .paneHeader, .authenticationPageTitle, .higlightedLoginLable,
+.newsUpdatesTitle, .documentScanHeader, .optionHeaderStyle, .ceinTitle {
+	-fx-font-family: 'Space Grotesk SemiBold';
+	-fx-text-fill: -cein-ink;
+}
+.ceinTitle { -fx-font-size: 26px; }
+.ceinSubtitle { -fx-font-size: 15px; -fx-text-fill: -cein-muted; }
+.ceinSectionTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 16px; -fx-text-fill: -cein-ink; }
+.ceinEyebrow { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 12px; -fx-text-fill: -cein-muted; }
+.ceinMuted { -fx-text-fill: -cein-muted; -fx-font-size: 13px; }
+.ceinError { -fx-text-fill: -cein-error; -fx-font-size: 13px; }
+.label { -fx-text-fill: -cein-ink; }
+
+.hyperlink, .hyperLinkStyle {
+	-fx-text-fill: -cein-green;
+	-fx-font-family: 'Inter Medium';
+	-fx-border-color: transparent;
+	-fx-underline: false;
+}
+.hyperlink:hover, .hyperLinkStyle:hover { -fx-text-fill: -cein-green-dark; -fx-underline: true; }
+
+/* ---------- buttons ---------- */
+.button {
+	-fx-background-color: white;
+	-fx-background-radius: 8;
+	-fx-border-color: -cein-border;
+	-fx-border-radius: 8;
+	-fx-border-width: 1;
+	-fx-text-fill: -cein-ink;
+	-fx-font-family: 'Inter Medium';
+	-fx-font-size: 14px;
+	-fx-padding: 0 16 0 16;
+	-fx-min-height: 40;
+	-fx-cursor: hand;
+	-fx-effect: null;
+}
+.button:hover { -fx-background-color: -cein-bg; }
+.button:focused { -fx-border-color: -cein-green; -fx-border-width: 2; }
+.button:disabled { -fx-opacity: 0.55; }
+
+/* primary actions */
+.contiuneButton, .loginSubmitStyle, .uinUpdateBtnStyle, .onboardScanBtn,
+.demoGraphicPaneContentButton, .ceinPrimary {
+	-fx-background-color: -cein-green;
+	-fx-border-color: -cein-green;
+	-fx-text-fill: white;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 15px;
+	-fx-min-height: 44;
+	-fx-padding: 0 22 0 22;
+}
+.contiuneButton:hover, .loginSubmitStyle:hover, .uinUpdateBtnStyle:hover, .onboardScanBtn:hover,
+.demoGraphicPaneContentButton:hover, .ceinPrimary:hover {
+	-fx-background-color: -cein-green-hover;
+}
+.contiuneButton:disabled, .loginSubmitStyle:disabled, .ceinPrimary:disabled {
+	-fx-background-color: -cein-line;
+	-fx-border-color: -cein-line;
+	-fx-text-fill: #6B7783;
+	-fx-opacity: 1;
+}
+.contiuneButton .text, .loginSubmitStyle .text, .ceinPrimary .text { -fx-fill: white; }
+
+/* secondary / outline */
+.backButton, .homeButton, .scanButton, .ceinSecondary {
+	-fx-background-color: white;
+	-fx-border-color: -cein-border;
+	-fx-text-fill: -cein-ink;
+	-fx-font-family: 'Inter Medium';
+	-fx-min-height: 44;
+}
+.ceinOutline {
+	-fx-background-color: white;
+	-fx-border-color: -cein-green;
+	-fx-text-fill: -cein-green;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-min-height: 40;
+}
+.ceinDanger {
+	-fx-background-color: white;
+	-fx-border-color: -cein-error-border;
+	-fx-text-fill: -cein-error;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-min-height: 40;
+}
+.ceinGhost {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-text-fill: -cein-ink-2;
+}
+.ceinGhost:hover { -fx-background-color: -cein-bg; }
+
+/* ---------- text inputs ---------- */
+.text-field, .password-field, .text-area .content, .loginTextStyle, .demoGraphicTextField,
+.demoGraphicTextFieldOnType, .demoGraphicTextFieldFocused, .searchBoxTextStyle, .settingsTextField {
+	-fx-background-color: white;
+	-fx-background-radius: 8;
+	-fx-border-color: -cein-border;
+	-fx-border-radius: 8;
+	-fx-border-width: 1;
+	-fx-text-fill: -cein-ink;
+	-fx-prompt-text-fill: #7A8693;
+	-fx-font-family: 'Inter';
+	-fx-font-size: 15px;
+	-fx-padding: 0 12 0 12;
+	-fx-min-height: 44;
+}
+.text-area { -fx-background-color: transparent; -fx-border-color: transparent; }
+.text-area .content { -fx-padding: 8 12 8 12; }
+.text-field:focused, .password-field:focused, .demoGraphicTextFieldFocused {
+	-fx-border-color: -cein-green;
+	-fx-border-width: 2;
+	-fx-padding: 0 11 0 11;
+}
+.text-field:disabled, .password-field:disabled { -fx-opacity: 0.6; -fx-background-color: -cein-bg; }
+.ceinInvalid, .text-field.ceinInvalid { -fx-border-color: -cein-error; -fx-border-width: 2; }
+
+/* field labels generated by the dynamic form */
+.demoGraphicFieldLabel, .demoGraphicFieldLabelOnType, .settingsLabel {
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 14px;
+	-fx-text-fill: -cein-ink;
+}
+
+/* ---------- combo boxes ---------- */
+.combo-box, .combo-box-base, .loginCombobox, .deviceDetailsComboBox, .demographicCombobox,
+.demographicComboboxFocused, .choice-box {
+	-fx-background-color: white;
+	-fx-background-radius: 8;
+	-fx-border-color: -cein-border;
+	-fx-border-radius: 8;
+	-fx-border-width: 1;
+	-fx-min-height: 44;
+	-fx-font-size: 15px;
+}
+.combo-box:focused, .demographicComboboxFocused { -fx-border-color: -cein-green; -fx-border-width: 2; }
+.combo-box .list-cell { -fx-text-fill: -cein-ink; -fx-padding: 0 8 0 10; -fx-background-color: transparent; }
+.combo-box .arrow-button { -fx-background-color: transparent; -fx-padding: 0 12 0 8; }
+.combo-box .arrow { -fx-background-color: -cein-muted; }
+.combo-box-popup .list-view {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line;
+	-fx-background-radius: 8;
+	-fx-border-radius: 8;
+	-fx-effect: dropshadow(gaussian, rgba(14, 26, 36, 0.18), 16, 0, 0, 4);
+}
+.combo-box-popup .list-view .list-cell { -fx-padding: 8 12 8 12; -fx-text-fill: -cein-ink; -fx-background-color: white; }
+.combo-box-popup .list-view .list-cell:hover, .combo-box-popup .list-view .list-cell:filled:selected {
+	-fx-background-color: -cein-green-light;
+	-fx-text-fill: -cein-green-dark;
+}
+
+/* ---------- check boxes / radios ---------- */
+.check-box, .radio-button { -fx-text-fill: -cein-ink; -fx-font-size: 15px; }
+.check-box .box, .radio-button .radio {
+	-fx-background-color: white;
+	-fx-border-color: #7A8693;
+	-fx-border-width: 1.5;
+	-fx-border-radius: 4;
+	-fx-background-radius: 4;
+}
+.radio-button .radio { -fx-border-radius: 10; -fx-background-radius: 10; }
+.check-box:selected .box { -fx-background-color: -cein-green; -fx-border-color: -cein-green; }
+.check-box:selected .mark { -fx-background-color: white; }
+.radio-button:selected .radio { -fx-border-color: -cein-green; }
+.radio-button:selected .dot { -fx-background-color: -cein-green; }
+.updateUinCheckBox, .updateUinCheckBoxSelected, .languageCheckBox {
+	-fx-padding: 14 16 14 16;
+	-fx-background-color: white;
+	-fx-border-color: -cein-border;
+	-fx-border-radius: 8;
+	-fx-background-radius: 8;
+}
+.updateUinCheckBoxSelected { -fx-border-color: -cein-green; -fx-border-width: 2; }
+
+/* ---------- tables ---------- */
+.table-view {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line;
+	-fx-border-radius: 12;
+	-fx-background-radius: 12;
+	-fx-padding: 0;
+	-fx-table-cell-border-color: transparent;
+}
+.table-view .column-header-background { -fx-background-color: -cein-bg; -fx-background-radius: 12 12 0 0; }
+.table-view .column-header, .table-view .filler {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-size: 40;
+}
+.table-view .column-header .label {
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 12px;
+	-fx-text-fill: -cein-muted;
+	-fx-alignment: center-left;
+	-fx-padding: 0 8 0 8;
+}
+.table-row-cell {
+	-fx-background-color: white;
+	-fx-border-color: transparent transparent -cein-line-soft transparent;
+	-fx-cell-size: 44;
+}
+.table-row-cell:hover { -fx-background-color: #F8FAF9; }
+.table-row-cell:selected { -fx-background-color: -cein-green-light; }
+.table-row-cell:selected .table-cell { -fx-text-fill: -cein-ink; }
+.table-cell { -fx-text-fill: -cein-ink; -fx-font-size: 14px; -fx-padding: 0 8 0 8; -fx-alignment: center-left; }
+.tableId { -fx-font-family: monospace; -fx-font-size: 13px; }
+
+/* ---------- tabs ---------- */
+.tab-pane > .tab-header-area > .headers-region > .tab {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent transparent transparent transparent;
+	-fx-border-width: 0 0 2 0;
+	-fx-padding: 10 4 10 4;
+	-fx-background-insets: 0;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+	-fx-border-color: transparent transparent -cein-green transparent;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab .tab-label {
+	-fx-text-fill: -cein-ink-2;
+	-fx-font-family: 'Inter Medium';
+	-fx-font-size: 15px;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label {
+	-fx-text-fill: -cein-green-dark;
+	-fx-font-family: 'Inter SemiBold';
+}
+.tab-pane > .tab-header-area > .tab-header-background {
+	-fx-background-color: white;
+	-fx-border-color: transparent transparent -cein-line transparent;
+}
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator { -fx-border-color: transparent; }
+
+/* ---------- scroll bars / progress ---------- */
+.scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
+.scroll-bar { -fx-background-color: transparent; }
+.scroll-bar .thumb { -fx-background-color: #B8C2CB; -fx-background-radius: 4; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-padding: 0; -fx-pref-height: 0; -fx-pref-width: 0; }
+.scroll-bar:vertical { -fx-pref-width: 10; }
+.scroll-bar:horizontal { -fx-pref-height: 10; }
+.progress-bar > .bar { -fx-background-color: -cein-green; -fx-background-radius: 4; -fx-background-insets: 0; }
+.progress-bar > .track { -fx-background-color: -cein-line-soft; -fx-background-radius: 4; }
+.progress-indicator > .determinate-indicator > .indicator { -fx-background-color: -cein-line-soft, -cein-green; }
+
+/* ---------- surfaces ---------- */
+.ceinCard {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line;
+	-fx-border-radius: 12;
+	-fx-background-radius: 12;
+}
+.ceinPage { -fx-background-color: -cein-bg; }
+.ceinBar { -fx-background-color: white; -fx-border-color: -cein-line; }
+.tooltip {
+	-fx-background-color: -cein-ink;
+	-fx-text-fill: white;
+	-fx-font-size: 13px;
+	-fx-background-radius: 6;
+	-fx-padding: 6 10 6 10;
+}
