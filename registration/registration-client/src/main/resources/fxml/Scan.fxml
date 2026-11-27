@@ -110,13 +110,13 @@
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="100.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" percentHeight="5.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" percentHeight="75.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" percentHeight="4.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" percentHeight="78.0" prefHeight="30.0" vgrow="SOMETIMES" />
                       <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <GridPane alignment="CENTER_RIGHT" hgap="20.0" vgap="20.0" GridPane.rowIndex="2">
+                        <GridPane alignment="CENTER_RIGHT" hgap="20.0" vgap="18.0" GridPane.rowIndex="2">
                            <children>
                               <Button fx:id="streamBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#stream" styleClass="scanButton" text="%stream">
                                  <graphic>
@@ -136,7 +136,17 @@
                                     </ImageView>
                                  </graphic>
                               </Button>
-                              <Button fx:id="saveBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#save" styleClass="scanButton" text="%save" GridPane.rowIndex="2">
+                              <!-- Mayoro added browse file button  -->
+                              <Button fx:id="browseBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#browseFile" styleClass="scanButton" text="Parcourir" GridPane.rowIndex="2">
+                                 <graphic>
+                                    <ImageView fx:id="browseImageView" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/browse.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button fx:id="saveBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#save" styleClass="scanButton" text="%save" GridPane.rowIndex="3">
                                  <graphic>
                                     <ImageView fx:id="saveImageView" fitHeight="19.0" fitWidth="77.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -145,7 +155,7 @@
                                     </ImageView>
                                  </graphic>
                               </Button>
-                              <Button fx:id="cropButton" graphicTextGap="10.0" mnemonicParsing="false" onAction="#crop" styleClass="scanButton" text="%crop" GridPane.rowIndex="3">
+                              <Button fx:id="cropButton" graphicTextGap="10.0" mnemonicParsing="false" onAction="#crop" styleClass="scanButton" text="%crop" GridPane.rowIndex="4">
                                  <graphic>
                                     <ImageView fx:id="backImageView1" fitHeight="20.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -154,7 +164,7 @@
                                     </ImageView>
                                  </graphic>
                               </Button>
-                              <Button fx:id="cancelBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#cancel" styleClass="scanButton" text="%cancel" GridPane.rowIndex="4">
+                              <Button fx:id="cancelBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#cancel" styleClass="scanButton" text="%cancel" GridPane.rowIndex="5">
                                  <graphic>
                                     <ImageView fx:id="cancelImageView" fitHeight="22.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -163,7 +173,7 @@
                                     </ImageView>
                                  </graphic>
                               </Button>
-                              <Button fx:id="previewBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#preview" styleClass="scanButton" text="%view" GridPane.rowIndex="5">
+                              <Button fx:id="previewBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#preview" styleClass="scanButton" text="%view" GridPane.rowIndex="6">
                                  <graphic>
                                     <ImageView fx:id="previewImageView" fitHeight="26.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -172,20 +182,20 @@
                                     </ImageView>
                                  </graphic>
                               </Button>
-                              <Text fx:id="scanningMsg" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="alertContext" GridPane.rowIndex="6" />
+                              <Text fx:id="scanningMsg" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="alertContext" GridPane.rowIndex="7" />
                            </children>
                            <columnConstraints>
                               <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
                            </columnConstraints>
                            <rowConstraints>
+                              <RowConstraints percentHeight="9.0" vgrow="SOMETIMES" />
                               <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
                               <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
                               <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
                               <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
                               <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
                               <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
-                              <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
-                              <RowConstraints percentHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints percentHeight="31.0" vgrow="SOMETIMES" />
                            </rowConstraints>
                         </GridPane>
                      </children>

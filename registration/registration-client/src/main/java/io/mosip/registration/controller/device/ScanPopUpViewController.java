@@ -1,10 +1,16 @@
 package io.mosip.registration.controller.device;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +32,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,11 +46,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -112,6 +122,12 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 	private DocumentScanController documentScanController;
 	@Autowired
 	private DocScannerFacade docScannerFacade;
+
+	// CEIN: "Parcourir" button - load a document image from disk
+	@FXML
+	private Button browseBtn;
+	@FXML
+	private ImageView browseImageView;
 
 	@Value("${mosip.doc.stage.width:1200}")
 	private int width;
@@ -691,5 +707,133 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		cancelBtn.setDisable(true);
 		cropButton.setDisable(true);
 		previewBtn.setDisable(true);
+	}
+
+	// ------------------------------------------------------------------
+	// CEIN: browse / upload a document image from the file system
+	// ------------------------------------------------------------------
+
+	@FXML
+	private void browseFile() {
+		try {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Sélectionner un document");
+			FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+					"Fichiers image (*.png, *.jpg, *.jpeg, *.bmp, *.gif)",
+					"*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif");
+			fileChooser.getExtensionFilters().add(extFilter);
+
+			File selectedFile = fileChooser.showOpenDialog(browseBtn.getScene().getWindow());
+			if (selectedFile != null) {
+				loadAndIntegrateSelectedFile(selectedFile);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Erreur lors de la sélection du fichier", e);
+			showErrorMessage("Erreur lors de la sélection du fichier: " + e.getMessage());
+		}
+	}
+
+	private void loadAndIntegrateSelectedFile(File file) {
+		try {
+			BufferedImage originalImage = ImageIO.read(file);
+			if (originalImage == null) {
+				showErrorMessage("Format de fichier non supporté");
+				return;
+			}
+
+			BufferedImage convertedImage = convertToMosipFormat(originalImage);
+
+			if (documentScanController.getScannedPages() == null) {
+				documentScanController.setScannedPages(new ArrayList<>());
+			}
+			documentScanController.getScannedPages().add(convertedImage);
+
+			displayUploadedImage(convertedImage);
+			updateUIAfterUpload();
+
+			if (scanningMsg != null) {
+				scanningMsg.setText("Fichier chargé: " + file.getName());
+				scanningMsg.setStyle("-fx-text-fill: green;");
+				scanningMsg.setVisible(true);
+			}
+			LOGGER.info("Fichier chargé avec succès: {}", file.getName());
+		} catch (Exception e) {
+			LOGGER.error("Impossible de charger le fichier: {}", file.getAbsolutePath(), e);
+			showErrorMessage("Impossible de charger le fichier: " + e.getMessage());
+		}
+	}
+
+	private BufferedImage convertToMosipFormat(BufferedImage originalImage) {
+		try {
+			BufferedImage convertedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
+			Graphics2D g2d = convertedImage.createGraphics();
+			g2d.setColor(Color.WHITE);
+			g2d.fillRect(0, 0, originalImage.getWidth(), originalImage.getHeight());
+			g2d.drawImage(originalImage, 0, 0, null);
+			g2d.dispose();
+
+			LOGGER.info("Image convertie au format MOSIP: {}x{} - Type: {}", convertedImage.getWidth(),
+					convertedImage.getHeight(), convertedImage.getType());
+			return convertedImage;
+		} catch (Exception e) {
+			LOGGER.error("Erreur lors de la conversion de l'image", e);
+			return originalImage;
+		}
+	}
+
+	private void displayUploadedImage(BufferedImage bufferedImage) {
+		try {
+			WritableImage fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+			getImageGroup().getChildren().clear();
+			ImageView imageView = new ImageView(fxImage);
+			imageView.setPreserveRatio(true);
+			getImageGroup().getChildren().add(imageView);
+
+			scanImage.setVisible(true);
+			setWebCamStream(false);
+			isStreamPaused = true;
+		} catch (Exception e) {
+			LOGGER.error("Erreur lors de l'affichage de l'image", e);
+			showErrorMessage("Erreur lors de l'affichage de l'image");
+		}
+	}
+
+	private void updateUIAfterUpload() {
+		try {
+			int totalPages = documentScanController.getScannedPages().size();
+			int currentPage = totalPages;
+			initializeDocPages(currentPage, totalPages);
+
+			saveBtn.setDisable(false);
+			previewBtn.setDisable(false);
+			cropButton.setDisable(false);
+			cancelBtn.setDisable(false);
+			streamBtn.setDisable(false);
+			captureBtn.setDisable(false);
+
+			showPreview(true);
+			LOGGER.info("Interface mise à jour - Total pages: {}, Page courante: {}", totalPages, currentPage);
+		} catch (Exception e) {
+			LOGGER.error("Erreur lors de la mise à jour de l'interface", e);
+		}
+	}
+
+	@Override
+	public Image getImage(BufferedImage bufferedImage) {
+		if (bufferedImage == null) {
+			return null;
+		}
+		return SwingFXUtils.toFXImage(bufferedImage, null);
+	}
+
+	private void showErrorMessage(String message) {
+		if (scanningMsg != null) {
+			scanningMsg.setText(message);
+			scanningMsg.setStyle("-fx-text-fill: red;");
+			scanningMsg.setVisible(true);
+		}
+		generateAlert(RegistrationConstants.ERROR, message);
+		LOGGER.error("MOSIP Browse Error: {}", message);
 	}
 }
