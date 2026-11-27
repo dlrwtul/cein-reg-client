@@ -16,6 +16,8 @@ OUT = ROOT / "registration/registration-client/src/main/resources/images_cein"
 GREEN = (0, 107, 51)
 INK = (46, 59, 71)
 HEADER_ICONS = ["User.png", "RegCentreLocation.png", "system.png", "hamburger.png", "Home-small.png"]
+# large single-colour icons: resized to 64 px and filled with the CEIN green
+FLAT_ICONS = ["browse.png"]
 
 
 def pink_to_green(im):
@@ -65,7 +67,15 @@ def main():
         if f.suffix.lower() != ".png" or f.name.startswith("LoginBackGround") or f.name.startswith("logo"):
             continue
         im = Image.open(f).convert("RGBA")
-        if f.name in HEADER_ICONS:
+        if f.name in FLAT_ICONS:
+            im = im.resize((64, 64), Image.LANCZOS)
+            px = im.load()
+            for y in range(im.height):
+                for x in range(im.width):
+                    px[x, y] = GREEN + (px[x, y][3],)
+            im.save(OUT / f.name)
+            count += 1
+        elif f.name in HEADER_ICONS:
             to_ink(im).save(OUT / f.name)
             count += 1
         elif im.width * im.height <= 512 * 512 and is_pink(im):

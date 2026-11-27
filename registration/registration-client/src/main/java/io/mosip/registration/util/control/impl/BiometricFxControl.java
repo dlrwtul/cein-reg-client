@@ -134,13 +134,13 @@ public class BiometricFxControl extends FxControl {
 
 		Label label = new Label();
 		label.setText(String.join(RegistrationConstants.SLASH, labels));
-		label.getStyleClass().add(RegistrationConstants.QUALITY_BOX_LABEL);
+		label.getStyleClass().addAll(RegistrationConstants.QUALITY_BOX_LABEL, "ceinBioFieldLabel");
 
 		GridPane gridPane = createGridPane();
-		gridPane.setHgap(10);
+		gridPane.setHgap(16);
 		gridPane.setId(fieldName);
-		gridPane.add(label,1,0);
-		GridPane.setHalignment(label, HPos.CENTER);
+		gridPane.add(label, 0, 0, 2, 1);
+		GridPane.setHalignment(label, HPos.LEFT);
 		GridPane.setValignment(label, VPos.TOP);
 		this.node = gridPane;
 
@@ -156,7 +156,8 @@ public class BiometricFxControl extends FxControl {
 			default:
 				modalityListingNode = new VBox();
 				modalityListingNode.setId(uiFieldDTO.getId()+"_listing");
-				//((VBox)modalityListingNode).setSpacing(5);
+				((VBox)modalityListingNode).setSpacing(10);
+				modalityListingNode.getStyleClass().add("ceinBioModalities");
 				((VBox)modalityListingNode).getChildren().addAll(modalityList);
 				gridPane.add(modalityListingNode,0,1);
 				Parent captureDetails = null;
@@ -187,22 +188,24 @@ public class BiometricFxControl extends FxControl {
 	}
 
 	private GridPane createGridPane() {
+		// CEIN: fixed modality column on the left, capture panel takes the remaining width
 		GridPane gridPane = new GridPane();
-		
-		gridPane.setPadding(new Insets(50, 0, 0, 0));
+		gridPane.getStyleClass().add("ceinBioField");
+		gridPane.setPadding(new Insets(4, 0, 0, 0));
+		gridPane.setVgap(12);
 		RowConstraints topRowConstraints = new RowConstraints();
-		topRowConstraints.setPercentHeight(5);
 		RowConstraints midRowConstraints = new RowConstraints();
-		midRowConstraints.setPercentHeight(95);
-		gridPane.getRowConstraints().addAll(topRowConstraints,midRowConstraints);
+		midRowConstraints.setValignment(VPos.TOP);
+		gridPane.getRowConstraints().addAll(topRowConstraints, midRowConstraints);
 
 		ColumnConstraints columnConstraint1 = new ColumnConstraints();
-		columnConstraint1.setPercentWidth(15);
+		columnConstraint1.setMinWidth(130);
+		columnConstraint1.setPrefWidth(130);
 		ColumnConstraints columnConstraint2 = new ColumnConstraints();
-		columnConstraint2.setPercentWidth(80);
+		columnConstraint2.setHgrow(Priority.ALWAYS);
 		ColumnConstraints columnConstraint3 = new ColumnConstraints();
-		columnConstraint3.setPercentWidth(5);
-		gridPane.getColumnConstraints().addAll(columnConstraint1, columnConstraint2,columnConstraint3);
+		columnConstraint3.setMaxWidth(0);
+		gridPane.getColumnConstraints().addAll(columnConstraint1, columnConstraint2, columnConstraint3);
 		return gridPane;
 	}
 

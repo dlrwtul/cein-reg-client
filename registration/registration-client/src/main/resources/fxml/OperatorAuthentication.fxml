@@ -503,7 +503,7 @@
 															<children>
 																<GridPane fx:id="fingerPrintInstructionPane" GridPane.columnIndex="1" GridPane.rowIndex="1">
 																	<children>
-																		<Label prefHeight="${fingerPrintInstructionPane.height}" prefWidth="${fingerPrintInstructionPane.width}" styleClass="operatorAuthenticationStyleTextTypeOne" text="%fingerprintinstruction" GridPane.rowIndex="1" />
+																		<Label prefHeight="${fingerPrintInstructionPane.height}" prefWidth="${fingerPrintInstructionPane.width}" styleClass="operatorAuthenticationStyleTextTypeOne" text="%fingerprintinstruction" wrapText="true" textAlignment="CENTER" alignment="CENTER" GridPane.rowIndex="1" />
 																	</children>
 																	<columnConstraints>
 																		<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -515,7 +515,7 @@
 																</GridPane>
 															</children>
 														</GridPane>
-                                          <Button fx:id="fingerPrintScanButton" mnemonicParsing="false" styleClass="contiuneButton" onAction="#scan" prefHeight="6.0" prefWidth="84.0" text="%scan" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                          <Button fx:id="fingerPrintScanButton" mnemonicParsing="false" styleClass="contiuneButton, ceinAuthScan" onAction="#scan" minWidth="150.0" text="%scan" GridPane.halignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 													</children>
 												</GridPane>
 											</children>
@@ -677,7 +677,7 @@
 															<children>
 																<GridPane fx:id="irisInstructionPane" GridPane.columnIndex="1" GridPane.rowIndex="1">
 																	<children>
-																		<Label prefHeight="${irisInstructionPane.height}" prefWidth="${irisInstructionPane.width}" styleClass="operatorAuthenticationStyleTextTypeOne" text="%irisinstruction" GridPane.rowIndex="1" />
+																		<Label prefHeight="${irisInstructionPane.height}" prefWidth="${irisInstructionPane.width}" styleClass="operatorAuthenticationStyleTextTypeOne" text="%irisinstruction" wrapText="true" textAlignment="CENTER" alignment="CENTER" GridPane.rowIndex="1" />
 																	</children>
 																	<columnConstraints>
 																		<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -689,7 +689,7 @@
 																</GridPane>
 															</children>
 														</GridPane>
-														<Button fx:id="irisScanButton" mnemonicParsing="false" styleClass="contiuneButton" onAction="#scan" prefHeight="6.0" prefWidth="84.0" text="%scan" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+														<Button fx:id="irisScanButton" mnemonicParsing="false" styleClass="contiuneButton, ceinAuthScan" onAction="#scan" minWidth="150.0" text="%scan" GridPane.halignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 											
 													</children>
 												</GridPane>
@@ -852,7 +852,7 @@
 															<children>
 																<GridPane fx:id="photoInstructionPane" GridPane.columnIndex="1" GridPane.rowIndex="1">
 																	<children>
-																		<Label prefHeight="${photoInstructionPane.height}" prefWidth="${photoInstructionPane.width}" styleClass="operatorAuthenticationStyleTextTypeOne" text="%faceinstruction" GridPane.rowIndex="1" />
+																		<Label prefHeight="${photoInstructionPane.height}" prefWidth="${photoInstructionPane.width}" styleClass="operatorAuthenticationStyleTextTypeOne" text="%faceinstruction" wrapText="true" textAlignment="CENTER" alignment="CENTER" GridPane.rowIndex="1" />
 																	</children>
 																	<columnConstraints>
 																		<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -864,7 +864,7 @@
 																</GridPane>
 															</children>
 														</GridPane>
-														<Button fx:id="faceScanButton" mnemonicParsing="false" styleClass="contiuneButton" onAction="#scan" prefHeight="6.0" prefWidth="84.0" text="%scan" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+														<Button fx:id="faceScanButton" mnemonicParsing="false" styleClass="contiuneButton, ceinAuthScan" onAction="#scan" minWidth="150.0" text="%scan" GridPane.halignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 											
 													</children>
 												</GridPane>
