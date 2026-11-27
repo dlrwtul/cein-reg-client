@@ -32,9 +32,10 @@ Elle a été reconstruite à partir du JAR `registration-client-1.2.0.2.jar` liv
 Aucun autre fichier ne diffère. Les autres modules (`registration-services`,
 `registration-api`, etc.) sont ceux de la version officielle 1.2.0.2.
 
-## Delta par rapport à MOSIP 1.2.0.2
+## Customisation d'origine (JAR du 2025-08-26)
 
-Chaque point correspond à un commit (`git log 4f8bfb2..`).
+Ce qui a été reporté tel quel depuis le JAR livré, un commit par point
+(`4f8bfb2..02964d3`). La section « Revue » plus bas décrit ce qui a changé ensuite.
 
 ### 1. Français forcé comme langue unique
 - `controller/Initialization.java` : au démarrage, positionne des propriétés système
@@ -77,6 +78,65 @@ Certaines images présentes dans le JAR livré ne sont référencées nulle part
 `browse2.png`, `LoginBackGroundOri.png`, `logo-final_ori.png` et `logo-final-small_ori.png`.
 Les trois `*Ori*/*_ori*` sont des copies des images MOSIP d'origine, toujours disponibles
 via `git show 4f8bfb2:<chemin>`.
+
+## Revue (peigne) : état actuel
+
+| Sujet | Avant (JAR livré) | Maintenant |
+|---|---|---|
+| Français forcé | Propriétés système `mosip.registration.language.*` que MOSIP ne lit nulle part, liste de langues reconstruite à la main, pop-up court-circuitée de l'intérieur, `labels_en` patché (`submit=Soumettre`) parce que l'écran de login était chargé avant le forçage | `CeinSettings.getForcedLanguage()` : la langue forcée devient la langue de l'application dès le chargement des bundles, le login filtre la liste standard, `PacketHandlerController` enchaîne sans pop-up. `Initialization`, `LanguageSelectionController`, `TextFieldFxControl` et `labels_en` sont revenus à l'identique de l'amont |
+| Onboarding | Contournement systématique, log « Mayoro » | Désactivable par configuration, ne s'applique que si l'onboarding était demandé, WARN avec l'identifiant de l'utilisateur |
+| Textes en dur | « REPUBLIQUE DU SÉNÉGAL », « Parcourir », messages du scan, styles inline | Clés `countryTitle`, `browse*` dans `labels_fr/en/ar`, classes CSS `ceinCountryTitle` / `ceinHeaderSection` |
+| Parcourir | Images seulement, aucune limite, textes en dur, couleur du message sans effet (`-fx-text-fill` sur un `Text`) | PDF (toutes les pages, 200 dpi), PNG/JPG/BMP, taille max, réduction des grandes images, i18n, bouton masquable |
+| Reçu | A4 sur l'imprimante par défaut | Impression thermique 58/80 mm (voir ci-dessous) |
+| Debug | `System.out` au démarrage, au login et à la sélection de langue | Supprimés |
+
+### Langue : la configuration serveur reste la bonne pratique
+
+Le forçage côté client garantit l'interface en français, mais le plus propre est de
+configurer aussi le serveur (`registration-default.properties`) :
+
+```properties
+mosip.mandatory-languages=fra
+mosip.optional-languages=
+```
+
+La langue forcée doit faire partie de ces deux listes. Sinon ses bundles ne sont pas
+chargés, le forçage est ignoré et un WARN est écrit dans les logs. Si le serveur exige
+d'autres langues obligatoires (par exemple `eng`), le client ne saisit que le français,
+comme c'était déjà le cas avec le JAR livré : vérifiez que le registration-processor
+accepte ces paquets.
+
+## Configuration CEIN
+
+Toutes les clés se règlent dans `registration-default.properties` sur le config server.
+Elles sont synchronisées vers le poste et peuvent être surchargées localement. La valeur par
+défaut s'applique quand la clé est absente.
+
+| Clé | Défaut | Effet |
+|---|---|---|
+| `mosip.registration.cein.forced-language` | `fra` | Langue unique de l'interface et des enregistrements. Vide = comportement MOSIP standard |
+| `mosip.registration.cein.skip-onboarding-for-non-default-users` | `true` | Les opérateurs sans rôle `DEFAULT` ne passent pas par l'onboarding (pas de capture biométrique opérateur ni de rattachement au poste au premier login) |
+| `mosip.registration.cein.doc-browse.enabled` | `true` | Affiche le bouton « Parcourir » dans la pop-up de scan |
+| `mosip.registration.cein.doc-browse.max-size-kb` | `5120` | Taille maximale du fichier importé |
+| `mosip.registration.cein.doc-browse.max-dimension-px` | `2480` | Plus grand côté d'une image importée, réduite au-delà (2480 px = A4 à 300 dpi) |
+| `mosip.registration.cein.receipt.paper` | `80` | `80` ou `58` = rouleau thermique de cette largeur en mm, `A4` = impression MOSIP standard |
+| `mosip.registration.cein.receipt.printable-width-mm` | `72` (rouleau 80), `48` (rouleau 58) | Largeur réellement imprimable de la tête |
+| `mosip.registration.cein.receipt.printer-name` | vide | Partie du nom de l'imprimante du reçu (par exemple `TM-T20`). Vide = imprimante par défaut |
+
+### Impression thermique du reçu
+
+1. Imprimante : celle désignée par `printer-name`, sinon l'imprimante par défaut.
+2. Papier : parmi les formats exposés par le pilote, celui dont la largeur est la plus proche
+   du rouleau (± 6 mm), le plus long en priorité pour ne pas couper le reçu en pages. Marges minimales.
+3. Mise en page : une feuille de style réservée à l'impression (`@media print`) est injectée dans
+   le reçu. Le gabarit HTML, conçu pour l'A4, se réajuste à la largeur imprimable : tableaux
+   fluides, images réduites, police compacte. L'aperçu à l'écran ne change pas.
+4. Si le pilote n'expose aucun format rouleau, son format par défaut est utilisé et le contenu
+   reste limité à la largeur imprimable.
+
+Le gabarit du reçu (`reg-ack-template`) vient de la master data du serveur. Pour un rendu
+optimal, on peut créer un gabarit dédié au thermique : une seule colonne, QR code centré,
+pas de photo pleine largeur.
 
 ## Build
 
