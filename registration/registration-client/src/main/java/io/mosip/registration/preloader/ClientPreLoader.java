@@ -1,5 +1,6 @@
 package io.mosip.registration.preloader;
 
+import io.mosip.registration.cein.CeinFonts;
 import io.mosip.registration.constants.RegistrationConstants;
 import io.mosip.registration.exception.RegBaseCheckedException;
 import io.mosip.registration.update.ClientSetupValidator;
@@ -11,6 +12,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TitledPane;
+import javafx.scene.image.ImageView;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -27,33 +32,54 @@ public class ClientPreLoader extends Preloader {
     private Stage preloaderStage;
     private ProgressBar progressBar = new ProgressBar();
     private TextArea textArea = new TextArea();
-    private Label label = new Label("Starting Registration Client : Please wait...");
-    private Button stopClient = new Button("Stop Client");
-    private Button hidePreLoader = new Button("Exit");
+    private Label label = new Label("Démarrage en cours…");
+    private Button stopClient = new Button("Arrêter le client");
+    private Button hidePreLoader = new Button("Fermer");
+
+    // CEIN: readable start-up steps (the raw technical log stays available below)
+    private final VBox steps = new VBox(8);
+    private Label currentStep;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.preloaderStage = primaryStage;
+        CeinFonts.load();
 
-        VBox loading = new VBox(20);
-        loading.setMaxWidth(Region.USE_PREF_SIZE);
-        loading.setMaxHeight(Region.USE_PREF_SIZE);
-        loading.getChildren().add(label);
-        loading.getChildren().add(progressBar);
-        loading.getChildren().add(textArea);
-        textArea.setPrefWidth(500);
-        textArea.setPrefHeight(300);
+        // ---- header: flag + title + version
+        Label title = new Label("Démarrage du client d'enregistrement");
+        title.getStyleClass().add("ceinPreloaderTitle");
+        Label version = new Label("CEIN · MOSIP 1.2.0.2");
+        version.getStyleClass().add("ceinMuted");
+        VBox titles = new VBox(2, title, version);
+        HBox header = new HBox(14, flag(), titles);
+        header.setAlignment(Pos.CENTER_LEFT);
 
+        // ---- current status + progress
+        label.getStyleClass().add("ceinPreloaderStatus");
+        label.setWrapText(true);
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+        progressBar.setPrefHeight(8);
+
+        // ---- technical log, collapsed
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefHeight(140);
+        textArea.getStyleClass().add("ceinPreloaderLog");
+        TitledPane log = new TitledPane("Journal technique", textArea);
+        log.setExpanded(false);
+        log.setAnimated(false);
+        log.getStyleClass().add("ceinPreloaderLogPane");
+
+        // ---- actions
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox buttons = new HBox();
-        buttons.getChildren().add(hidePreLoader);
-        buttons.getChildren().add(spacer);
-        buttons.getChildren().add(stopClient);
-        loading.getChildren().add(buttons);
+        stopClient.getStyleClass().add("ceinDanger");
+        hidePreLoader.getStyleClass().add("ceinPrimary");
+        HBox buttons = new HBox(12, spacer, stopClient, hidePreLoader);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
 
         stopClient.setVisible(false);
+        stopClient.setManaged(false);
         stopClient.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -63,6 +89,7 @@ public class ClientPreLoader extends Preloader {
         });
 
         hidePreLoader.setVisible(false);
+        hidePreLoader.setManaged(false);
         hidePreLoader.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -70,16 +97,122 @@ public class ClientPreLoader extends Preloader {
             }
         });
 
-        BorderPane root = new BorderPane(loading);
+        VBox card = new VBox(18, header, label, progressBar, steps, log, buttons);
+        card.getStyleClass().addAll("ceinCard", "ceinPreloaderCard");
+        card.setMaxWidth(640);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
+
+        StackPane root = new StackPane();
+        root.getStyleClass().add("ceinPreloaderRoot");
+        try {
+            ImageView background = new ImageView(new Image(getClass().getResource("/images/LoginBackGround.png").toExternalForm()));
+            background.setOpacity(0.22);
+            background.setPreserveRatio(false);
+            background.fitWidthProperty().bind(root.widthProperty());
+            background.fitHeightProperty().bind(root.heightProperty());
+            root.getChildren().add(background);
+        } catch (Exception e) {
+            logger.warn("Preloader background not found");
+        }
+        root.getChildren().add(card);
+        StackPane.setMargin(card, new Insets(24));
+
         Scene scene = new Scene(root);
+        try {
+            scene.getStylesheets().add(getClass().getResource("/application-cein.css").toExternalForm());
+        } catch (Exception e) {
+            logger.warn("CEIN stylesheet not found for the preloader");
+        }
         primaryStage.initStyle(StageStyle.UNDECORATED);
-        primaryStage.setWidth(800);
-        primaryStage.setHeight(600);
+        primaryStage.setWidth(820);
+        primaryStage.setHeight(660);
         primaryStage.setResizable(true);
-        primaryStage.setTitle("Client Pre-Loader");
+        primaryStage.setTitle("Client d'enregistrement - démarrage");
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(new Image(getClass().getResource(RegistrationConstants.LOGO).toExternalForm()));
         primaryStage.show();
+    }
+
+    /** Senegal flag drawn with shapes (no image needed). */
+    private static HBox flag() {
+        HBox flag = new HBox();
+        Region g = new Region(); g.setStyle("-fx-background-color: #00853F;");
+        Region y = new Region(); y.setStyle("-fx-background-color: #FDEF42;");
+        Region r = new Region(); r.setStyle("-fx-background-color: #E31B23;");
+        for (Region band : new Region[] { g, y, r }) {
+            band.setPrefSize(16, 32);
+            band.setMinSize(16, 32);
+        }
+        StackPane middle = new StackPane(y, star());
+        flag.getChildren().addAll(g, middle, r);
+        flag.setMinSize(48, 32);
+        flag.setMaxSize(48, 32);
+        return flag;
+    }
+
+    private static javafx.scene.shape.SVGPath star() {
+        javafx.scene.shape.SVGPath star = new javafx.scene.shape.SVGPath();
+        star.setContent("M8 2 L9.8 7.4 L15.5 7.4 L10.9 10.8 L12.6 16.2 L8 12.9 L3.4 16.2 L5.1 10.8 L0.5 7.4 L6.2 7.4 Z");
+        star.setStyle("-fx-fill: #00853F;");
+        star.setScaleX(0.8);
+        star.setScaleY(0.8);
+        return star;
+    }
+
+    /** Adds a readable step for a known technical message; returns false when the message is unknown. */
+    private void addStep(String message) {
+        String text = translate(message);
+        if (text == null) {
+            return;
+        }
+        markCurrentStepDone();
+        currentStep = new Label(text);
+        currentStep.getStyleClass().addAll("ceinStep", "ceinStepCurrent");
+        javafx.scene.control.ProgressIndicator spinner = new javafx.scene.control.ProgressIndicator();
+        spinner.setPrefSize(16, 16);
+        spinner.setMaxSize(16, 16);
+        currentStep.setGraphic(spinner);
+        currentStep.setGraphicTextGap(10);
+        steps.getChildren().add(currentStep);
+        // keep the card compact: only the most recent steps are listed (full log below)
+        while (steps.getChildren().size() > 7) {
+            steps.getChildren().remove(0);
+        }
+        label.setText(text + "…");
+    }
+
+    private void markCurrentStepDone() {
+        if (currentStep == null) {
+            return;
+        }
+        currentStep.getStyleClass().remove("ceinStepCurrent");
+        currentStep.getStyleClass().add("ceinStepDone");
+        javafx.scene.shape.SVGPath check = new javafx.scene.shape.SVGPath();
+        check.setContent("M2 8 L6 12 L14 3");
+        check.setStyle("-fx-fill: transparent; -fx-stroke: #006B33; -fx-stroke-width: 2.4; -fx-stroke-line-cap: round; -fx-stroke-line-join: round;");
+        StackPane box = new StackPane(check);
+        box.setPrefSize(16, 16);
+        box.setMinSize(16, 16);
+        currentStep.setGraphic(box);
+    }
+
+    private static String translate(String message) {
+        if (message == null) return null;
+        String m = message.trim();
+        if (m.startsWith("Started to validate the build setup")) return "Vérification des fichiers du client";
+        if (m.startsWith("Client integrity check successful")) return "Intégrité du client vérifiée";
+        if (m.startsWith("Creating application context")) return "Préparation de l'application";
+        if (m.startsWith("Checking for any DB upgrades")) return "Vérification de la base de données locale";
+        if (m.startsWith("Language setup complete")) return "Langues configurées";
+        if (m.startsWith("Properties with local preferences")) return "Préférences locales chargées";
+        if (m.startsWith("Checking server connectivity")) return "Connexion au serveur";
+        if (m.startsWith("Machine is ONLINE")) return "Serveur joignable";
+        if (m.startsWith("Machine is OFFLINE")) return "Serveur injoignable : fonctionnement hors ligne";
+        if (m.startsWith("Client settings startup sync started")) return "Synchronisation des paramètres";
+        if (m.startsWith("Warning : ** NO VALID AUTH-TOKEN")) return "Synchronisation reportée à la connexion";
+        if (m.startsWith("Biometric device scanning started")) return "Recherche des périphériques biométriques";
+        if (m.startsWith("Job scheduler started")) return "Tâches planifiées démarrées";
+        return null;
     }
 
     @Override
@@ -93,15 +226,21 @@ public class ClientPreLoader extends Preloader {
             errorsFound = true;
             Throwable t = ((ClientPreLoaderErrorNotification)info).getCause();
             textArea.appendText(t.getMessage()+"\n");
+            label.setText("Le démarrage a échoué : " + t.getMessage());
+            label.getStyleClass().add("ceinError");
             hidePreLoader.setVisible(false);
+            hidePreLoader.setManaged(false);
             stopClient.setVisible(true);
+            stopClient.setManaged(true);
             logger.error(t.getMessage(), t);
             return;
         }
 
         if(info instanceof ClientPreLoaderNotification) {
-            textArea.appendText(((ClientPreLoaderNotification)info).getMessage());
+            String message = ((ClientPreLoaderNotification)info).getMessage();
+            textArea.appendText(message);
             textArea.appendText("\n");
+            addStep(message);
             return;
         }
     }
@@ -110,6 +249,7 @@ public class ClientPreLoader extends Preloader {
     public void handleStateChangeNotification(StateChangeNotification stateChangeNotification) {
         if (stateChangeNotification.getType() == StateChangeNotification.Type.BEFORE_LOAD) {
             textArea.appendText("Started to validate the build setup...\n");
+            addStep("Started to validate the build setup");
             try {
                 progressBar.setProgress(0.1);
                 ClientSetupValidator clientSetupValidator = new ClientSetupValidator();
@@ -139,18 +279,27 @@ public class ClientPreLoader extends Preloader {
         }
         if (stateChangeNotification.getType() == StateChangeNotification.Type.BEFORE_START) {
             if(restartRequired) {
-                label.setText("Starting Registration Client : Restart Required");
+                label.setText("Redémarrage nécessaire : des mises à jour du client ont été téléchargées. Fermez puis relancez le client.");
+                stopClient.setText("Quitter");
+                stopClient.setVisible(true);
+                stopClient.setManaged(true);
             }
             else if(errorsFound) {
-                label.setText("Starting Registration Client : Failed!");
+                label.setText("Le démarrage a échoué. Consultez le journal technique.");
+                if (!label.getStyleClass().contains("ceinError")) label.getStyleClass().add("ceinError");
+                stopClient.setVisible(true);
+                stopClient.setManaged(true);
             }
             else {
                 textArea.appendText("Setting up application stage...\n");
                 progressBar.setProgress(100);
-                label.setText("Starting Registration Client : Success.");
+                markCurrentStepDone();
+                label.setText("Client démarré.");
                 textArea.appendText("Registration client started :)\n");
                 hidePreLoader.setVisible(true);
+                hidePreLoader.setManaged(true);
                 stopClient.setVisible(true);
+                stopClient.setManaged(true);
             }
         }
     }

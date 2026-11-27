@@ -1,178 +1,277 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane id="loginScreen" prefHeight="553.0" prefWidth="523.0" styleClass="loginBorderPaneStyle"
-  xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2"
-  fx:controller="io.mosip.registration.controller.auth.LoginController">
-  <bottom>
-    <HBox id="footer-section">
+<!-- CEIN: login screen. Every fx:id / handler expected by LoginController is kept;
+     the authentication panes are stacked in the card and shown by the controller. -->
+<BorderPane id="loginScreen" styleClass="ceinLoginRoot" xmlns:fx="http://javafx.com/fxml/1"
+  xmlns="http://javafx.com/javafx/11" fx:controller="io.mosip.registration.controller.auth.LoginController">
+
+  <left>
+    <StackPane fx:id="ceinBrandPane" minWidth="360.0" prefWidth="560.0" styleClass="ceinLoginBrand">
       <children>
-        <Label text="%mosip.io" />
-        <Label text="  " />
-        <Label text="%regClientVersion" />
-        <Label text=" : " />
-        <Label fx:id="versionValueLabel" />
-      </children>
-    </HBox>
-  </bottom>
-  <right>
-    <AnchorPane fx:id="contentPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-      minWidth="-Infinity" prefHeight="550.0" prefWidth="489.0">
-      <children>
-        <AnchorPane fx:id="userIdPane" layoutX="37.0" layoutY="188.0"
-          styleClass="userNameAnchorPaneStyle" visible="true">
-          <children>
-            <Label styleClass="higlightedLoginLable" text="%registrationlogin"
-              AnchorPane.leftAnchor="54.0" AnchorPane.topAnchor="20.0" />
-            <TextField fx:id="userId" layoutY="158.0" onAction="#validateUserId"
-              promptText="%withusername" styleClass="loginTextStyle" AnchorPane.leftAnchor="53.0" />
-            <ComboBox fx:id="appLanguage" layoutY="101.0" promptText="%chooselanguage"
-              styleClass="loginCombobox" AnchorPane.leftAnchor="53.0" />
-            <Button fx:id="sub1" layoutX="53.0" layoutY="211.0" mnemonicParsing="false"
-              onAction="#validateUserId" styleClass="loginSubmitStyle" text="%submit" />
-            <ProgressIndicator fx:id="progressIndicator" layoutX="130.0" layoutY="50.0"
-              progress="0.0" visible="false" />
-            <Hyperlink fx:id="forgotUsrnme" layoutX="167.0" layoutY="293.0" mnemonicParsing="false"
-              onAction="#forgotUsrname" styleClass="hyperLinkStyle" text="%forgotUsername"
-              visible="false" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="credentialsPane" layoutX="37.0" layoutY="188.0"
-          styleClass="loginAnchorPaneExtendedStyle" visible="false">
-          <children>
-            <Label styleClass="higlightedLoginLable" text="%registrationlogin"
-              AnchorPane.leftAnchor="57.0" AnchorPane.topAnchor="41.0" />
-            <PasswordField fx:id="password" layoutY="116.0" onAction="#validateCredentials"
-              promptText="%withpword" styleClass="loginTextStyle" AnchorPane.leftAnchor="53.0" />
-            <Button fx:id="sub2" layoutX="52.0" layoutY="171.0" mnemonicParsing="false"
-              onAction="#validateCredentials" styleClass="loginSubmitStyle" text="%submit" />
-            <!--                   <Button layoutX="52.0" layoutY="222.0" mnemonicParsing="false"
-            styleClass="loginSubmitStyle" text="%resetPassword" /> -->
-            <Hyperlink fx:id="forgotPword" layoutX="270.0" layoutY="222.0" mnemonicParsing="false"
-              onAction="#forgotPword" styleClass="hyperLinkStyle" text="%forgotPword" />
-            <Hyperlink fx:id="back" layoutX="52.0" layoutY="222.0" mnemonicParsing="false"
-              onAction="#back" styleClass="hyperLinkStyle" text="%back" />
-            <ProgressIndicator fx:id="passwordProgressIndicator" layoutX="130.0" layoutY="50.0"
-              progress="0.0" visible="false" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="otpPane" layoutX="-6.0" layoutY="151.0" prefHeight="297.0"
-          prefWidth="366.0" styleClass="loginAnchorPaneExtendedStyle" visible="false">
-          <children>
-            <Label styleClass="higlightedLoginLable" text="%registrationlogin"
-              AnchorPane.leftAnchor="57.0" AnchorPane.topAnchor="21.0" />
-            <PasswordField fx:id="otp" layoutY="96.0" onAction="#validateOTP" promptText="%enterotp"
-              styleClass="loginTextStyle" AnchorPane.leftAnchor="53.0" />
-            <Button fx:id="getOTP" layoutX="53.0" layoutY="144.0" mnemonicParsing="false"
-              onAction="#generateOtp" styleClass="loginSubmitStyle" text="%getotp" visible="true" />
-            <Button fx:id="resend" layoutX="53.0" layoutY="144.0" mnemonicParsing="false"
-              onAction="#generateOtp" styleClass="loginSubmitStyle" text="%resendotp"
-              visible="false" />
-            <Button fx:id="otpSubmit" disable="true" layoutX="53.0" layoutY="195.0"
-              mnemonicParsing="false" onAction="#validateOTP" styleClass="loginSubmitStyle"
-              text="%submit" />
-            <Label fx:id="otpValidity" layoutX="60.0" layoutY="245.0"
-              styleClass="loginOtpValidStyle" visible="false" />
-            <Hyperlink layoutX="52.0" layoutY="234.0" mnemonicParsing="false" onAction="#back"
-              styleClass="hyperLinkStyle" text="%back" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="fingerprintPane" layoutX="72.0" layoutY="220.0" prefHeight="192.0"
-          prefWidth="207.0" styleClass="loginAnchorPaneStyle" visible="false">
-          <children>
-            <Label styleClass="higlightedLoginLable" text="%registrationlogin"
-              AnchorPane.leftAnchor="57.0" AnchorPane.topAnchor="21.0" />
-            <Label layoutX="57.0" layoutY="75.0" text="%withfingerprint" />
-            <Button fx:id="submit" layoutX="57.0" layoutY="170.0" mnemonicParsing="false"
-              onAction="#captureFingerPrint" styleClass="loginSubmitStyle" text="%submit" />
-            <ImageView fx:id="fingerprintImageView" fitHeight="59.0" fitWidth="53.0" layoutX="180.0"
-              layoutY="102.0" pickOnBounds="true" preserveRatio="true">
-              <image>
-                <Image url="@../images/FingerprintScan.png" />
-              </image>
-            </ImageView>
-            <Hyperlink layoutX="52.0" layoutY="222.0" mnemonicParsing="false" onAction="#back"
-              styleClass="hyperLinkStyle" text="%back" />
-            <ProgressIndicator fx:id="fpProgressIndicator" layoutX="130.0" layoutY="50.0"
-              progress="0.0" visible="false" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="irisPane" layoutX="55.0" layoutY="231.0" prefHeight="242.0"
-          prefWidth="379.0" styleClass="loginAnchorPaneStyle" visible="false">
-          <children>
-            <Label styleClass="higlightedLoginLable" text="%registrationlogin"
-              AnchorPane.leftAnchor="57.0" AnchorPane.topAnchor="31.0" />
-            <Label layoutX="57.0" layoutY="76.0" text="%withiris" />
-            <Button layoutX="57.0" layoutY="174.0" mnemonicParsing="false" onAction="#captureIris"
-              styleClass="loginSubmitStyle" text="%submit" />
-            <ImageView fx:id="irisImageView" fitHeight="59.0" fitWidth="53.0" layoutX="180.0"
-              layoutY="102.0" pickOnBounds="true" preserveRatio="true">
-              <image>
-                <Image url="@../images/Eyescan.png" />
-              </image>
-            </ImageView>
-            <Hyperlink layoutX="52.0" layoutY="222.0" mnemonicParsing="false" onAction="#back"
-              styleClass="hyperLinkStyle" text="%back" />
-            <ProgressIndicator fx:id="irisProgressIndicator" layoutX="130.0" layoutY="50.0"
-              progress="0.0" visible="false" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="facePane" layoutX="10.0" layoutY="38.0" prefHeight="510.0"
-          prefWidth="458.0" styleClass="loginAnchorPaneStyle" visible="false">
-          <children>
-            <Label styleClass="higlightedLoginLable" text="%registrationlogin"
-              AnchorPane.leftAnchor="35.0" AnchorPane.topAnchor="14.0" />
-            <Label layoutX="35.0" layoutY="71.0" text="%withface" />
-            <Button layoutX="134.0" layoutY="474.0" mnemonicParsing="false" onAction="#captureFace"
-              styleClass="loginSubmitStyle1" text="%submit" />
-            <Button layoutX="217.0" layoutY="474.0" mnemonicParsing="false" onAction="#streamFace"
-              styleClass="loginSubmitStyle1" text="Stream" />
-            <ImageView fx:id="faceImage" fitHeight="353.0" fitWidth="378.0" layoutX="38.0"
-              layoutY="113.0" pickOnBounds="true" preserveRatio="true">
-              <image>
-                <Image url="@../images/FaceScan.png" />
-              </image>
-            </ImageView>
-            <Hyperlink layoutX="52.0" layoutY="476.0" mnemonicParsing="false" onAction="#back"
-              styleClass="hyperLinkStyle" text="%back" />
-            <ProgressIndicator fx:id="faceProgressIndicator" layoutX="130.0" layoutY="50.0"
-              progress="0.0" visible="false" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="errorPane" layoutX="108.0" layoutY="153.0"
-          styleClass="loginAnchorPaneStyle" visible="false">
-          <children>
-            <Label prefWidth="300.0" text="%internalsystemerror.pleasecontactadmin." />
-          </children>
-        </AnchorPane>
-      </children>
-    </AnchorPane>
-  </right>
-  <top>
-    <HBox id="header-section" alignment="CENTER_LEFT" spacing="30.0" prefHeight="60.0"
-      prefWidth="523.0" styleClass="ceinHeaderSection">
-      <children>
-        <!-- Logo -->
-        <ImageView fx:id="mosipLogoImageView" fitHeight="60.0" fitWidth="90.0">
+        <ImageView fitWidth="${ceinBrandPane.width}" fitHeight="${ceinBrandPane.height}" managed="false" opacity="0.35" preserveRatio="false">
           <image>
-            <Image url="@../images/logo-final.png" />
+            <Image url="@../images/LoginBackGround.png" />
           </image>
         </ImageView>
-        <Label text="%countryTitle" styleClass="ceinCountryTitle" />
+        <VBox spacing="0.0" styleClass="ceinLoginBrandContent">
+          <children>
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+              <children>
+                <ImageView fx:id="mosipLogoImageView" fitHeight="36.0" fitWidth="54.0" preserveRatio="false">
+                  <image>
+                    <Image url="@../images/logo-final-small.png" />
+                  </image>
+                </ImageView>
+                <VBox spacing="2.0">
+                  <children>
+                    <Label styleClass="ceinCountryTitle" text="%countryTitle" />
+                    <Label styleClass="ceinLoginMotto" text="%ceinMotto" />
+                  </children>
+                </VBox>
+              </children>
+            </HBox>
+            <Region VBox.vgrow="ALWAYS" />
+            <VBox maxWidth="440.0" spacing="16.0">
+              <children>
+                <Label styleClass="ceinLoginEyebrow" text="%ceinLoginEyebrow" />
+                <Label styleClass="ceinLoginHeadline" text="%ceinLoginTitle" wrapText="true" />
+                <Label styleClass="ceinLoginText" text="%ceinLoginText" wrapText="true" />
+              </children>
+            </VBox>
+            <Region VBox.vgrow="ALWAYS" />
+            <HBox maxWidth="120.0" prefHeight="6.0" styleClass="ceinFlagBar">
+              <children>
+                <Region HBox.hgrow="ALWAYS" styleClass="ceinFlagGreen" />
+                <Region HBox.hgrow="ALWAYS" styleClass="ceinFlagYellow" />
+                <Region HBox.hgrow="ALWAYS" styleClass="ceinFlagRed" />
+              </children>
+            </HBox>
+          </children>
+        </VBox>
+      </children>
+    </StackPane>
+  </left>
+
+  <center>
+    <VBox>
+      <children>
+    <StackPane styleClass="ceinLoginFormArea" VBox.vgrow="ALWAYS">
+      <children>
+        <AnchorPane fx:id="contentPane" maxHeight="-Infinity" maxWidth="440.0" prefWidth="440.0">
+          <children>
+            <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <children>
+
+                <!-- step 1: user id -->
+                <AnchorPane fx:id="userIdPane" managed="${userIdPane.visible}" visible="true">
+                  <children>
+                    <VBox spacing="18.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <VBox spacing="6.0">
+                          <children>
+                            <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                            <Label styleClass="ceinSubtitle" text="%ceinLoginSubtitleUser" wrapText="true" />
+                          </children>
+                        </VBox>
+                        <ComboBox fx:id="appLanguage" maxWidth="Infinity" promptText="%chooselanguage" styleClass="loginCombobox" />
+                        <VBox spacing="8.0">
+                          <children>
+                            <Label styleClass="ceinFieldLabel" text="%ceinUserIdLabel" />
+                            <TextField fx:id="userId" maxWidth="Infinity" onAction="#validateUserId" promptText="%withusername" styleClass="loginTextStyle" />
+                          </children>
+                        </VBox>
+                        <Button fx:id="sub1" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateUserId" styleClass="loginSubmitStyle" text="%submit" />
+                        <ProgressIndicator fx:id="progressIndicator" managed="${progressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
+                        <Hyperlink fx:id="forgotUsrnme" managed="${forgotUsrnme.visible}" mnemonicParsing="false" onAction="#forgotUsrname" styleClass="hyperLinkStyle" text="%forgotUsername" visible="false" />
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+                <!-- step 2: password -->
+                <AnchorPane fx:id="credentialsPane" managed="${credentialsPane.visible}" visible="false">
+                  <children>
+                    <VBox spacing="18.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <VBox spacing="6.0">
+                          <children>
+                            <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                            <Label styleClass="ceinSubtitle" text="%ceinLoginSubtitlePwd" wrapText="true" />
+                          </children>
+                        </VBox>
+                        <VBox spacing="2.0" styleClass="ceinLoginUserChip">
+                          <children>
+                            <Label styleClass="ceinMuted" text="%ceinUserIdLabel" />
+                            <Label styleClass="ceinLoginUserName" text="${userId.text}" />
+                          </children>
+                        </VBox>
+                        <VBox spacing="8.0">
+                          <children>
+                            <Label styleClass="ceinFieldLabel" text="%ceinPasswordLabel" />
+                            <PasswordField fx:id="password" maxWidth="Infinity" onAction="#validateCredentials" promptText="%withpword" styleClass="loginTextStyle" />
+                          </children>
+                        </VBox>
+                        <Button fx:id="sub2" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateCredentials" styleClass="loginSubmitStyle" text="%submit" />
+                        <ProgressIndicator fx:id="passwordProgressIndicator" managed="${passwordProgressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
+                        <HBox alignment="CENTER_LEFT" spacing="16.0">
+                          <children>
+                            <Hyperlink fx:id="back" mnemonicParsing="false" onAction="#back" styleClass="hyperLinkStyle" text="%ceinBackToUser" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Hyperlink fx:id="forgotPword" managed="${forgotPword.visible}" mnemonicParsing="false" onAction="#forgotPword" styleClass="hyperLinkStyle" text="%forgotPword" visible="false" />
+                          </children>
+                        </HBox>
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+                <!-- OTP -->
+                <AnchorPane fx:id="otpPane" managed="${otpPane.visible}" visible="false">
+                  <children>
+                    <VBox spacing="18.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                        <VBox spacing="8.0">
+                          <children>
+                            <Label styleClass="ceinFieldLabel" text="%ceinOtpLabel" />
+                            <PasswordField fx:id="otp" maxWidth="Infinity" onAction="#validateOTP" promptText="%enterotp" styleClass="loginTextStyle" />
+                          </children>
+                        </VBox>
+                        <StackPane>
+                          <children>
+                            <Button fx:id="getOTP" maxWidth="Infinity" mnemonicParsing="false" onAction="#generateOtp" styleClass="ceinOutline" text="%getotp" visible="true" />
+                            <Button fx:id="resend" maxWidth="Infinity" mnemonicParsing="false" onAction="#generateOtp" styleClass="ceinOutline" text="%resendotp" visible="false" />
+                          </children>
+                        </StackPane>
+                        <Button fx:id="otpSubmit" disable="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateOTP" styleClass="loginSubmitStyle" text="%submit" />
+                        <Label fx:id="otpValidity" managed="${otpValidity.visible}" styleClass="ceinMuted" visible="false" />
+                        <Hyperlink mnemonicParsing="false" onAction="#back" styleClass="hyperLinkStyle" text="%ceinBackToUser" />
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+                <!-- fingerprint -->
+                <AnchorPane fx:id="fingerprintPane" managed="${fingerprintPane.visible}" visible="false">
+                  <children>
+                    <VBox spacing="18.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                        <HBox alignment="CENTER_LEFT" spacing="16.0">
+                          <children>
+                            <Label styleClass="ceinSubtitle" text="%withfingerprint" wrapText="true" HBox.hgrow="ALWAYS" />
+                            <ImageView fx:id="fingerprintImageView" fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                <Image url="@../images/FingerprintScan.png" />
+                              </image>
+                            </ImageView>
+                          </children>
+                        </HBox>
+                        <Button fx:id="submit" maxWidth="Infinity" mnemonicParsing="false" onAction="#captureFingerPrint" styleClass="loginSubmitStyle" text="%submit" />
+                        <ProgressIndicator fx:id="fpProgressIndicator" managed="${fpProgressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
+                        <Hyperlink mnemonicParsing="false" onAction="#back" styleClass="hyperLinkStyle" text="%ceinBackToUser" />
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+                <!-- iris -->
+                <AnchorPane fx:id="irisPane" managed="${irisPane.visible}" visible="false">
+                  <children>
+                    <VBox spacing="18.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                        <HBox alignment="CENTER_LEFT" spacing="16.0">
+                          <children>
+                            <Label styleClass="ceinSubtitle" text="%withiris" wrapText="true" HBox.hgrow="ALWAYS" />
+                            <ImageView fx:id="irisImageView" fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                <Image url="@../images/Eyescan.png" />
+                              </image>
+                            </ImageView>
+                          </children>
+                        </HBox>
+                        <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#captureIris" styleClass="loginSubmitStyle" text="%submit" />
+                        <ProgressIndicator fx:id="irisProgressIndicator" managed="${irisProgressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
+                        <Hyperlink mnemonicParsing="false" onAction="#back" styleClass="hyperLinkStyle" text="%ceinBackToUser" />
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+                <!-- face -->
+                <AnchorPane fx:id="facePane" managed="${facePane.visible}" visible="false">
+                  <children>
+                    <VBox spacing="16.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                        <Label styleClass="ceinSubtitle" text="%withface" wrapText="true" />
+                        <StackPane styleClass="ceinLoginCamera">
+                          <children>
+                            <ImageView fx:id="faceImage" fitHeight="260.0" fitWidth="340.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                <Image url="@../images/FaceScan.png" />
+                              </image>
+                            </ImageView>
+                          </children>
+                        </StackPane>
+                        <HBox spacing="12.0">
+                          <children>
+                            <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#streamFace" styleClass="ceinOutline" text="%ceinStream" HBox.hgrow="ALWAYS" />
+                            <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#captureFace" styleClass="loginSubmitStyle" text="%submit" HBox.hgrow="ALWAYS" />
+                          </children>
+                        </HBox>
+                        <ProgressIndicator fx:id="faceProgressIndicator" managed="${faceProgressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
+                        <Hyperlink mnemonicParsing="false" onAction="#back" styleClass="hyperLinkStyle" text="%ceinBackToUser" />
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+                <!-- error -->
+                <AnchorPane fx:id="errorPane" managed="${errorPane.visible}" visible="false">
+                  <children>
+                    <VBox spacing="12.0" styleClass="ceinCard, ceinLoginCard" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <children>
+                        <Label styleClass="higlightedLoginLable" text="%registrationlogin" />
+                        <Label styleClass="ceinError" text="%internalsystemerror.pleasecontactadmin." wrapText="true" />
+                      </children>
+                    </VBox>
+                  </children>
+                </AnchorPane>
+
+              </children>
+            </StackPane>
+          </children>
+        </AnchorPane>
+      </children>
+    </StackPane>
+    <HBox alignment="CENTER_RIGHT" spacing="6.0" styleClass="ceinLoginFooter">
+      <children>
+        <Label styleClass="ceinMuted" text="%ceinClientVersion" />
+        <Label styleClass="ceinMuted" text=":" />
+        <Label fx:id="versionValueLabel" styleClass="ceinMuted" />
       </children>
     </HBox>
-  </top>
+      </children>
+    </VBox>
+  </center>
+
 </BorderPane>
