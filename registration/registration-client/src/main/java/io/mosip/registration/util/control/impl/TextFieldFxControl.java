@@ -335,6 +335,8 @@ public class TextFieldFxControl extends FxControl {
 				.getBundle(langCode, RegistrationConstants.LABELS).getString("language"));
 		textField.getStyleClass().add(RegistrationConstants.DEMOGRAPHIC_TEXTFIELD);
 		textField.setDisable(isDisable);
+		// CEIN: digits-only fields (e.g. NIN) refuse letters / extra digits while typing
+		io.mosip.registration.cein.CeinInputFilter.apply(textField, uiFieldDTO, langCode);
 
 		return textField;
 	}
