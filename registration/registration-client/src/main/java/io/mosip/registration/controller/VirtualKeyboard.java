@@ -406,66 +406,8 @@ public class VirtualKeyboard {
 	}
 
 	public void changeControlOfKeyboard(TextField textField) {
-		textField.setOnKeyPressed(new EventHandler<Event>() {
-			@Override
-			public void handle(Event event) {
-				if (!vkType.toString().contains("vk")) {
-					KeyEvent e = ((KeyEvent) event);
-					if (e.getCode().getName().equals("Caps Lock")) {
-						if (capsLock) {
-							capsLock = false;
-						} else {
-							capsLock = true;
-						}
-					}
-					if (e.getCode().getName().equals("Shift")) {
-						keyEvent = e;
-					}					
-					
-					textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
-			            @Override
-			            public void handle(KeyEvent event) {
-			                switch (event.getCode()) {			                   
-			                    case SHIFT:
-			                    	keyEvent = null;
-							default:
-								break;
-			                }
-			            }
-			        });
-					
-					String key;
-					if (capsLock || (keyEvent != null ? keyEvent.getCode() != null && keyEvent.getCode().getName() != null && keyEvent.getCode().getName().equals("Shift") : false)) {
-						try {
-							key = keyboard.getString("shift_" + e.getCode().getName().replaceAll("\\s", ""));
-						} catch (MissingResourceException exception) {
-							LOGGER.error("Virtual Keyboard", APPLICATION_NAME, RegistrationConstants.APPLICATION_ID,
-									exception.getMessage());
-							key = null;
-						}
-						if (key != null) {
-							textField.fireEvent(new KeyEvent(KeyEvent.KEY_TYPED, key, e.getCode().getName(),
-									e.getCode(), false, false, false, false));
-							textField.setEditable(false);
-						}
-					} else {
-						try {
-							key = keyboard.getString("unshift_" + e.getCode().getName().replaceAll("\\s", ""));
-						} catch (MissingResourceException exception) {
-							LOGGER.error("Virtual Keyboard", APPLICATION_NAME, RegistrationConstants.APPLICATION_ID,
-									exception.getMessage());
-							key = null;
-						}
-						if (key != null) {
-							textField.fireEvent(new KeyEvent(KeyEvent.KEY_TYPED, key, e.getCode().getName(),
-									e.getCode(), false, false, false, false));
-							textField.setEditable(false);
-						}
-					}
-				}
-			}
-		});
-
+		// CEIN: physical keystrokes are no longer re-mapped to the virtual keyboard layout
+		// (keyboard_<lang>.properties); what the operator types goes straight to the field.
 		textField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(final ObservableValue<? extends String> obsVal, final String oldValue,
@@ -477,17 +419,5 @@ public class VirtualKeyboard {
 			}
 		});
 
-	}
-
-	public void focusListener(TextField field, double y, Node keyboardNode) {
-		field.focusedProperty().addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue,
-					Boolean newPropertyValue) {
-				if (newPropertyValue) {
-					keyboardNode.setLayoutY(y);
-				}
-			}
-		});
 	}
 }
