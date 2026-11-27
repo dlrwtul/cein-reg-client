@@ -2699,3 +2699,14 @@ Working on new Css by taleev
     -fx-text-fill: #FF0000;
     -fx-font-weight: bold;
 }
+/* CEIN */
+.ceinCountryTitle {
+	-fx-font-size: 20px;
+	-fx-font-weight: bold;
+	-fx-text-fill: white;
+	-fx-padding: 0 0 0 20;
+}
+
+.ceinHeaderSection {
+	-fx-padding: 10 0 0 15;
+}

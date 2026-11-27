@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.registration.cein.CeinSettings;
 import io.mosip.registration.config.AppConfig;
 import io.mosip.registration.constants.AuditEvent;
 import io.mosip.registration.constants.AuditReferenceIdTypes;
@@ -56,10 +57,14 @@ public class HomeController extends BaseController implements Initializable {
 			LOGGER.info("REGISTRATION - REGSITRATION_HOME_PAGE_LAYOUT", APPLICATION_NAME, APPLICATION_ID,
 					"Constructing Registration Home Page");
 
-			// CEIN: only DEFAULT users go through the onboarding screen
+			// CEIN: operators (non DEFAULT users) are not sent to the onboarding screen when
+			// mosip.registration.cein.skip-onboarding-for-non-default-users is true (default).
+			// Their biometrics are then not captured/mapped on this machine at first login.
 			List<String> userRoles = SessionContext.userContext().getRoles();
-			if (!Role.isDefaultUser(userRoles)) {
-				LOGGER.info("Mayoro: Non-DEFAULT user detected, clearing onboard flags");
+			if (CeinSettings.skipOnboardingForNonDefaultUsers() && !Role.isDefaultUser(userRoles)
+					&& Boolean.TRUE.equals(SessionContext.map().get(RegistrationConstants.ONBOARD_USER))) {
+				LOGGER.warn("CEIN: onboarding skipped for user {} (roles {})",
+						SessionContext.userContext().getUserId(), userRoles);
 				SessionContext.map().put(RegistrationConstants.ONBOARD_USER, false);
 				SessionContext.map().put(RegistrationConstants.ONBOARD_USER_UPDATE, false);
 			}

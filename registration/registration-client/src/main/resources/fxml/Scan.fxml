@@ -136,8 +136,8 @@
                                     </ImageView>
                                  </graphic>
                               </Button>
-                              <!-- Mayoro added browse file button  -->
-                              <Button fx:id="browseBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#browseFile" styleClass="scanButton" text="Parcourir" GridPane.rowIndex="2">
+                              <!-- CEIN: load a document from disk -->
+                              <Button fx:id="browseBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#browseFile" styleClass="scanButton" text="%browse" GridPane.rowIndex="2">
                                  <graphic>
                                     <ImageView fx:id="browseImageView" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                        <image>

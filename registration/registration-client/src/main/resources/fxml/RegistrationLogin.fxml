@@ -163,8 +163,7 @@
   </right>
   <top>
     <HBox id="header-section" alignment="CENTER_LEFT" spacing="30.0" prefHeight="60.0"
-      prefWidth="523.0"
-      style="-fx-padding: 10 0 0 15;">
+      prefWidth="523.0" styleClass="ceinHeaderSection">
       <children>
         <!-- Logo -->
         <ImageView fx:id="mosipLogoImageView" fitHeight="60.0" fitWidth="90.0">
@@ -172,9 +171,7 @@
             <Image url="@../images/logo-final.png" />
           </image>
         </ImageView>
-        <!-- Texte en blanc avec marge -->
-        <Label text="REPUBLIQUE DU SÉNÉGAL"
-          style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white; -fx-padding: 0 0 0 20;" />
+        <Label text="%countryTitle" styleClass="ceinCountryTitle" />
       </children>
     </HBox>
   </top>
