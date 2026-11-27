@@ -11,7 +11,6 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -248,36 +247,24 @@ public class LoginController extends BaseController implements Initializable {
 		}).start();
 
 		try {
-			List<GenericDto> languages = getConfiguredLanguagesForLogin();
+			// CEIN: French only - the login language combobox is forced to "fra" and hidden
+			List<GenericDto> languages = new ArrayList<>();
+			GenericDto frenchLang = new GenericDto();
+			frenchLang.setCode("fra");
+			frenchLang.setName("Français");
+			languages.add(frenchLang);
+
+			appLanguage.getItems().clear();
 			appLanguage.getItems().addAll(languages);
-			
+
 			appLanguage.setConverter(FXUtils.getInstance().getStringConverterForComboBox());
-			Optional<GenericDto> selectedLang = languages.stream().filter( l ->
-					ApplicationContext.getInstance().getApplicationLanguage() != null &&
-							ApplicationContext.getInstance().getApplicationLanguage().equals(l.getCode())).findFirst();
 
-			if(!selectedLang.isPresent()) {
-				LOGGER.info("No Language is set in applicationContext, Default selection : {}", languages.get(0));
-				appLanguage.getSelectionModel().select(languages.get(0));
-			} else {
-				appLanguage.getSelectionModel().select(selectedLang.get());
-			}
+			ApplicationContext.getInstance().setApplicationLanguage("fra");
+			appLanguage.getSelectionModel().select(frenchLang);
 
-			appLanguage.setVisible(languages.size() == 1 ? false : true);
-			appLanguage.setManaged(languages.size() == 1 ? false : true);
-
-			appLanguage.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> {
-				if (newValue != null &&
-						!ApplicationContext.getInstance().getApplicationLanguage().equals(newValue.getCode())) {
-					userName = userId.getText();
-					ApplicationContext.getInstance().setApplicationLanguage(newValue.getCode());
-					ResourceBundle messageBundle = io.mosip.registration.context.ApplicationContext.getBundle(
-						io.mosip.registration.context.ApplicationContext.applicationLanguage(), RegistrationConstants.MESSAGES);
-					Validations.setResourceBundle(messageBundle);
-					RegistrationUIConstants.setBundle(messageBundle);
-					loadInitialScreen(getStage());
-				}
-			});
+			appLanguage.setVisible(false);
+			appLanguage.setManaged(false);
+			System.out.println("*** FRANÇAIS FORCÉ - COMBOBOX CACHÉE ***");
 
 			stopTimer();
 			password.textProperty().addListener((obsValue, oldValue, newValue) -> {

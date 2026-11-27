@@ -335,6 +335,10 @@ public class TextFieldFxControl extends FxControl {
 				.getBundle(langCode, RegistrationConstants.LABELS).getString("language"));
 		textField.getStyleClass().add(RegistrationConstants.DEMOGRAPHIC_TEXTFIELD);
 		textField.setDisable(isDisable);
+		// CEIN: French input locale
+		System.setProperty("javafx.input.method", "french");
+		System.setProperty("user.language", "fr");
+		System.setProperty("user.country", "FR");
 
 		return textField;
 	}
