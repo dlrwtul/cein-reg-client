@@ -5,6 +5,7 @@ import static io.mosip.registration.constants.LoggerConstants.LOG_SELECT_LANGUAG
 import static io.mosip.registration.constants.RegistrationConstants.APPLICATION_ID;
 import static io.mosip.registration.constants.RegistrationConstants.APPLICATION_NAME;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.registration.config.AppConfig;
 import io.mosip.registration.constants.RegistrationConstants;
@@ -26,11 +28,15 @@ import io.mosip.registration.context.ApplicationContext;
 import io.mosip.registration.controller.BaseController;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 @Controller
 public class LanguageSelectionController extends BaseController implements Initializable {
@@ -160,32 +166,30 @@ public class LanguageSelectionController extends BaseController implements Initi
 			//this.action = action;
 			selectedLanguages.clear();
 
-			// CEIN: French only - the language selection pop-up is bypassed
-			LOGGER.info(LOG_SELECT_LANGUAGE, APPLICATION_NAME, APPLICATION_ID,
-					"Bypassing language selection - French only configuration");
-			selectedLanguages.clear();
-			selectedLanguages.add("fra");
-			System.setProperty("mosip.registration.languages", "fra");
-			System.setProperty("mosip.registration.language.primary", "fra");
-			System.setProperty("mosip.registration.language.secondary", "");
-			System.setProperty("mosip.registration.multilang.enabled", "false");
-			registrationController.setSelectedLangList(selectedLanguages);
-			goToNextPage();
+			popupStage = new Stage();
+			popupStage.initStyle(StageStyle.UNDECORATED);
+
+			LOGGER.info(LOG_SELECT_LANGUAGE, APPLICATION_NAME, APPLICATION_ID, "loading SelectLanguage.fxml");
+			Parent scanPopup = BaseController.load(getClass().getResource(RegistrationConstants.SELECT_LANGUAGE_PAGE));
+
+			popupStage.setResizable(false);
+			Scene scene = new Scene(scanPopup);
+			scene.getStylesheets().add(ClassLoader.getSystemClassLoader().getResource(getCssName()).toExternalForm());
+			popupStage.setScene(scene);
+			popupStage.initModality(Modality.WINDOW_MODAL);
+			popupStage.initOwner(fXComponents.getStage());
+			popupStage.show();
 
 			LOGGER.info(LOG_SELECT_LANGUAGE, APPLICATION_NAME, APPLICATION_ID,
-					"French language auto-selected, proceeding to registration");
+					"Opening pop-up screen to select language for user registration");
 
-		} catch (Exception exception) {
-			LOGGER.error(LOG_SELECT_LANGUAGE, APPLICATION_NAME, APPLICATION_ID,
-					"Error in language selection bypass: " + exception.getMessage());
-			selectedLanguages.clear();
-			selectedLanguages.add("fra");
-			System.setProperty("mosip.registration.languages", "fra");
-			System.setProperty("mosip.registration.language.primary", "fra");
-			System.setProperty("mosip.registration.language.secondary", "");
-			System.setProperty("mosip.registration.multilang.enabled", "false");
-			registrationController.setSelectedLangList(selectedLanguages);
-			goToNextPage();
+		} catch (IOException ioException) {
+			LOGGER.error(LOG_SELECT_LANGUAGE, APPLICATION_NAME, APPLICATION_ID, String.format(
+					"%s -> Exception while Opening pop-up screen to select language in user registration  %s -> %s",
+					RegistrationConstants.USER_REG_SCAN_EXP, ioException.getMessage(),
+					ExceptionUtils.getStackTrace(ioException)));
+
+			generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.UNABLE_LOAD_SCAN_POPUP));
 		}
 	}
 

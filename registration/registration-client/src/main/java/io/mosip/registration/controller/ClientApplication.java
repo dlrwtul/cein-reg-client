@@ -18,6 +18,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.DateUtils;
 import io.mosip.registration.audit.AuditManagerSerivceImpl;
 import io.mosip.registration.audit.AuditManagerService;
+import io.mosip.registration.cein.CeinSettings;
 import io.mosip.registration.config.AppConfig;
 import io.mosip.registration.constants.AuditEvent;
 import io.mosip.registration.constants.AuditReferenceIdTypes;
@@ -245,6 +246,16 @@ public class ClientApplication extends Application {
 	protected void setupResourceBundleBasedOnDefaultAppLang() throws RegBaseCheckedException {
 		//load all bundles in memory and sets default application language
 		io.mosip.registration.context.ApplicationContext.loadResources();
+
+		// CEIN: the forced language (French by default) becomes the application language before
+		// the first screen is loaded, so every label comes from the right bundle.
+		String forcedLang = CeinSettings.getUsableForcedLanguage(RegistrationConstants.LABELS);
+		if (forcedLang != null) {
+			io.mosip.registration.context.ApplicationContext.getInstance().setApplicationLanguage(forcedLang);
+		} else if (CeinSettings.getForcedLanguage() != null) {
+			LOGGER.warn("CEIN forced language {} is not in mosip.mandatory-languages / mosip.optional-languages, ignored",
+					CeinSettings.getForcedLanguage());
+		}
 
 		ResourceBundle messageBundle = io.mosip.registration.context.ApplicationContext.getBundle(
 				io.mosip.registration.context.ApplicationContext.applicationLanguage(),

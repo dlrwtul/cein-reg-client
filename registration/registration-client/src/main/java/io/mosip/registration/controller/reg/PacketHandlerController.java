@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.templatemanager.spi.TemplateManagerBuilder;
+import io.mosip.registration.cein.CeinSettings;
 import io.mosip.registration.config.AppConfig;
 import io.mosip.registration.constants.AuditEvent;
 import io.mosip.registration.constants.AuditReferenceIdTypes;
@@ -885,7 +886,12 @@ public class PacketHandlerController extends BaseController implements Initializ
 			String processId = ((GridPane) event.getSource()).getId();
 			try {
 				languageSelectionController.setProcessId(processId);
-				if(isLanguageSelectionRequired()) {
+				String forcedLang = CeinSettings.getUsableForcedLanguage(RegistrationConstants.LABELS);
+				if (forcedLang != null) {
+					// CEIN: registrations are captured in the forced language only, no selection pop-up
+					languageSelectionController.submitLanguagesAndProceed(List.of(forcedLang));
+				}
+				else if(isLanguageSelectionRequired()) {
 					getStage().getScene().getRoot().setDisable(true);
 					languageSelectionController.init();
 				}
