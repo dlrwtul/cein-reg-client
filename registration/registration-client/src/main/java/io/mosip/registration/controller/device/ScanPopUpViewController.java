@@ -2,15 +2,22 @@ package io.mosip.registration.controller.device;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +27,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.registration.api.docscanner.DocScannerFacade;
 import io.mosip.registration.api.docscanner.DocScannerUtil;
 import io.mosip.registration.api.docscanner.dto.DocScanDevice;
+import io.mosip.registration.cein.CeinSettings;
 import io.mosip.registration.config.AppConfig;
 import io.mosip.registration.constants.RegistrationConstants;
 import io.mosip.registration.constants.RegistrationUIConstants;
@@ -195,6 +203,10 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		setImage(backImageView1	, RegistrationConstants.CROP_IMG);
 		setImage(cancelImageView	, RegistrationConstants.REJECT_IMG);
 		setImage(previewImageView	, RegistrationConstants.HOVER_IMG);
+
+		boolean browseEnabled = CeinSettings.isDocBrowseEnabled();
+		browseBtn.setVisible(browseEnabled);
+		browseBtn.setManaged(browseEnabled);
 	}
 
 	private void initializeDocPages(int currentPage, int totalPages) {
@@ -710,113 +722,139 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 	}
 
 	// ------------------------------------------------------------------
-	// CEIN: browse / upload a document image from the file system
+	// CEIN: load a document (PDF or image) from the file system
 	// ------------------------------------------------------------------
+
+	private static final int PDF_RENDER_DPI = 200;
 
 	@FXML
 	private void browseFile() {
+		ResourceBundle labels = applicationContext.getApplicationLanguageLabelBundle();
 		try {
 			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle("Sélectionner un document");
-			FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-					"Fichiers image (*.png, *.jpg, *.jpeg, *.bmp, *.gif)",
-					"*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif");
-			fileChooser.getExtensionFilters().add(extFilter);
+			fileChooser.setTitle(labels.getString("browseTitle"));
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(labels.getString("browseFilter"),
+					"*.pdf", "*.PDF", "*.png", "*.PNG", "*.jpg", "*.JPG", "*.jpeg", "*.JPEG", "*.bmp", "*.BMP"));
 
 			File selectedFile = fileChooser.showOpenDialog(browseBtn.getScene().getWindow());
 			if (selectedFile != null) {
-				loadAndIntegrateSelectedFile(selectedFile);
+				loadAndIntegrateSelectedFile(selectedFile, labels);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Erreur lors de la sélection du fichier", e);
-			showErrorMessage("Erreur lors de la sélection du fichier: " + e.getMessage());
+			LOGGER.error("Document browse failed", e);
+			showErrorMessage(MessageFormat.format(labels.getString("browseError"), e.getMessage()));
 		}
 	}
 
-	private void loadAndIntegrateSelectedFile(File file) {
+	private void loadAndIntegrateSelectedFile(File file, ResourceBundle labels) {
 		try {
-			BufferedImage originalImage = ImageIO.read(file);
-			if (originalImage == null) {
-				showErrorMessage("Format de fichier non supporté");
+			long maxSize = CeinSettings.getDocBrowseMaxSizeBytes();
+			if (file.length() > maxSize) {
+				showErrorMessage(MessageFormat.format(labels.getString("browseTooLarge"),
+						file.length() / 1024, maxSize / 1024));
 				return;
 			}
 
-			BufferedImage convertedImage = convertToMosipFormat(originalImage);
+			List<BufferedImage> pages = readPages(file);
+			if (pages.isEmpty()) {
+				showErrorMessage(labels.getString("browseUnsupported"));
+				return;
+			}
 
 			if (documentScanController.getScannedPages() == null) {
 				documentScanController.setScannedPages(new ArrayList<>());
 			}
-			documentScanController.getScannedPages().add(convertedImage);
+			BufferedImage lastPage = null;
+			for (BufferedImage page : pages) {
+				lastPage = convertToMosipFormat(page);
+				documentScanController.getScannedPages().add(lastPage);
+			}
 
-			displayUploadedImage(convertedImage);
+			displayUploadedImage(lastPage);
 			updateUIAfterUpload();
 
 			if (scanningMsg != null) {
-				scanningMsg.setText("Fichier chargé: " + file.getName());
-				scanningMsg.setStyle("-fx-text-fill: green;");
+				scanningMsg.setText(MessageFormat.format(labels.getString("browseLoaded"), file.getName()));
+				scanningMsg.setStyle("-fx-fill: green;");
 				scanningMsg.setVisible(true);
 			}
-			LOGGER.info("Fichier chargé avec succès: {}", file.getName());
+			LOGGER.info("Document loaded from disk: {} ({} page(s))", file.getName(), pages.size());
 		} catch (Exception e) {
-			LOGGER.error("Impossible de charger le fichier: {}", file.getAbsolutePath(), e);
-			showErrorMessage("Impossible de charger le fichier: " + e.getMessage());
+			LOGGER.error("Unable to load document {}", file.getAbsolutePath(), e);
+			showErrorMessage(MessageFormat.format(labels.getString("browseError"), e.getMessage()));
 		}
 	}
 
-	private BufferedImage convertToMosipFormat(BufferedImage originalImage) {
-		try {
-			BufferedImage convertedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
-					BufferedImage.TYPE_INT_RGB);
-			Graphics2D g2d = convertedImage.createGraphics();
-			g2d.setColor(Color.WHITE);
-			g2d.fillRect(0, 0, originalImage.getWidth(), originalImage.getHeight());
-			g2d.drawImage(originalImage, 0, 0, null);
-			g2d.dispose();
-
-			LOGGER.info("Image convertie au format MOSIP: {}x{} - Type: {}", convertedImage.getWidth(),
-					convertedImage.getHeight(), convertedImage.getType());
-			return convertedImage;
-		} catch (Exception e) {
-			LOGGER.error("Erreur lors de la conversion de l'image", e);
-			return originalImage;
+	/** Reads every page of a PDF (rendered at {@value #PDF_RENDER_DPI} dpi) or a single image. */
+	private List<BufferedImage> readPages(File file) throws IOException {
+		List<BufferedImage> pages = new ArrayList<>();
+		if (file.getName().toLowerCase().endsWith(".pdf")) {
+			try (PDDocument document = PDDocument.load(file)) {
+				PDFRenderer renderer = new PDFRenderer(document);
+				for (int i = 0; i < document.getNumberOfPages(); i++) {
+					pages.add(renderer.renderImageWithDPI(i, PDF_RENDER_DPI, ImageType.RGB));
+				}
+			}
+		} else {
+			BufferedImage image = ImageIO.read(file);
+			if (image != null) {
+				pages.add(image);
+			}
 		}
+		return pages;
+	}
+
+	/**
+	 * Flattens the image on a white background (no alpha, as the scanner output) and scales it
+	 * down so that its longest side does not exceed the configured maximum.
+	 */
+	private BufferedImage convertToMosipFormat(BufferedImage originalImage) {
+		int maxDimension = CeinSettings.getDocBrowseMaxDimensionPx();
+		int width = originalImage.getWidth();
+		int height = originalImage.getHeight();
+		double scale = Math.min(1d, (double) maxDimension / Math.max(width, height));
+		int targetWidth = Math.max(1, (int) Math.round(width * scale));
+		int targetHeight = Math.max(1, (int) Math.round(height * scale));
+
+		BufferedImage convertedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d = convertedImage.createGraphics();
+		try {
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			g2d.setColor(Color.WHITE);
+			g2d.fillRect(0, 0, targetWidth, targetHeight);
+			g2d.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+		} finally {
+			g2d.dispose();
+		}
+		LOGGER.debug("Imported image {}x{} converted to {}x{}", width, height, targetWidth, targetHeight);
+		return convertedImage;
 	}
 
 	private void displayUploadedImage(BufferedImage bufferedImage) {
-		try {
-			WritableImage fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
-			getImageGroup().getChildren().clear();
-			ImageView imageView = new ImageView(fxImage);
-			imageView.setPreserveRatio(true);
-			getImageGroup().getChildren().add(imageView);
+		WritableImage fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+		getImageGroup().getChildren().clear();
+		ImageView imageView = new ImageView(fxImage);
+		imageView.setPreserveRatio(true);
+		getImageGroup().getChildren().add(imageView);
 
-			scanImage.setVisible(true);
-			setWebCamStream(false);
-			isStreamPaused = true;
-		} catch (Exception e) {
-			LOGGER.error("Erreur lors de l'affichage de l'image", e);
-			showErrorMessage("Erreur lors de l'affichage de l'image");
-		}
+		scanImage.setVisible(true);
+		setWebCamStream(false);
+		isStreamPaused = true;
 	}
 
 	private void updateUIAfterUpload() {
-		try {
-			int totalPages = documentScanController.getScannedPages().size();
-			int currentPage = totalPages;
-			initializeDocPages(currentPage, totalPages);
+		int totalPages = documentScanController.getScannedPages().size();
+		initializeDocPages(totalPages, totalPages);
 
-			saveBtn.setDisable(false);
-			previewBtn.setDisable(false);
-			cropButton.setDisable(false);
-			cancelBtn.setDisable(false);
-			streamBtn.setDisable(false);
-			captureBtn.setDisable(false);
+		saveBtn.setDisable(false);
+		previewBtn.setDisable(false);
+		cropButton.setDisable(false);
+		cancelBtn.setDisable(false);
+		streamBtn.setDisable(false);
+		captureBtn.setDisable(false);
 
-			showPreview(true);
-			LOGGER.info("Interface mise à jour - Total pages: {}, Page courante: {}", totalPages, currentPage);
-		} catch (Exception e) {
-			LOGGER.error("Erreur lors de la mise à jour de l'interface", e);
-		}
+		showPreview(true);
 	}
 
 	@Override
@@ -830,10 +868,10 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 	private void showErrorMessage(String message) {
 		if (scanningMsg != null) {
 			scanningMsg.setText(message);
-			scanningMsg.setStyle("-fx-text-fill: red;");
+			scanningMsg.setStyle("-fx-fill: red;");
 			scanningMsg.setVisible(true);
 		}
 		generateAlert(RegistrationConstants.ERROR, message);
-		LOGGER.error("MOSIP Browse Error: {}", message);
+		LOGGER.error("Document browse error: {}", message);
 	}
 }
