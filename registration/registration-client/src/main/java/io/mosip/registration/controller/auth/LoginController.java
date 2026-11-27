@@ -356,7 +356,11 @@ public class LoginController extends BaseController implements Initializable {
 		primaryStage.setY(bounds.getMinY());
 		primaryStage.setWidth(bounds.getWidth());
 		primaryStage.setHeight(bounds.getHeight());
-		primaryStage.setResizable(false);
+		// CEIN: the window opens maximized but can be resized / restored by the operator
+		primaryStage.setResizable(true);
+		primaryStage.setMinWidth(Math.min(CeinSettings.getWindowMinWidth(), bounds.getWidth()));
+		primaryStage.setMinHeight(Math.min(CeinSettings.getWindowMinHeight(), bounds.getHeight()));
+		primaryStage.setMaximized(true);
 		primaryStage.setScene(scene);
 		primaryStage.getIcons().add(new Image(getClass().getResource(RegistrationConstants.LOGO).toExternalForm()));
 		primaryStage.show();

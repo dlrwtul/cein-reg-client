@@ -32,6 +32,10 @@ public final class CeinSettings {
 	/** Printable width of the thermal roll in mm (72 for 80 mm rolls, 48 for 58 mm rolls). */
 	public static final String RECEIPT_PRINTABLE_WIDTH_MM = "mosip.registration.cein.receipt.printable-width-mm";
 
+	/** Smallest size the operator can shrink the client window to (px). */
+	public static final String WINDOW_MIN_WIDTH = "mosip.registration.cein.window.min-width";
+	public static final String WINDOW_MIN_HEIGHT = "mosip.registration.cein.window.min-height";
+
 	private CeinSettings() {
 	}
 
@@ -89,6 +93,14 @@ public final class CeinSettings {
 
 	public static int getDocBrowseMaxDimensionPx() {
 		return getInt(DOC_BROWSE_MAX_DIMENSION_PX, 2480);
+	}
+
+	public static int getWindowMinWidth() {
+		return getInt(WINDOW_MIN_WIDTH, 1280);
+	}
+
+	public static int getWindowMinHeight() {
+		return getInt(WINDOW_MIN_HEIGHT, 720);
 	}
 
 	/** @return roll width in mm, or 0 when the standard A4 receipt must be printed. */
