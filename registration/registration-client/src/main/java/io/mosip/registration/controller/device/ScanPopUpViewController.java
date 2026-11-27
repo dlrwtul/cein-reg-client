@@ -719,6 +719,7 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		cancelBtn.setDisable(true);
 		cropButton.setDisable(true);
 		previewBtn.setDisable(true);
+		browseBtn.setDisable(true);
 	}
 
 	// ------------------------------------------------------------------

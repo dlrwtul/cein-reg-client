@@ -139,6 +139,55 @@ Le gabarit du reçu (`reg-ack-template`) vient de la master data du serveur. Pou
 optimal, on peut créer un gabarit dédié au thermique : une seule colonne, QR code centré,
 pas de photo pleine largeur.
 
+## Environnements et JAR à tester
+
+Le client installé sur les postes est celui téléchargé depuis le serveur MOSIP
+(zip 1.2.0.2). Pour appliquer la customisation, on remplace **deux JAR** dans son
+dossier `lib/` :
+
+| JAR | Contenu |
+|---|---|
+| `registration-client-1.2.0.2.jar` | Compilé depuis ce dépôt : toute la customisation CEIN |
+| `registration-services-1.2.0.2.jar` | JAR officiel MOSIP 1.2.0.2, classes inchangées, avec la configuration de l'environnement : `props/mosip-application.properties` et les clés de `spring.properties` |
+
+### Configuration par environnement
+
+```
+config/
+  common/spring.properties.overrides            # clés communes (langue fra…)
+  environments/sandbox/mosip-application.properties
+  environments/_modele/mosip-application.properties   # à copier pour un nouvel environnement
+```
+
+`mosip-application.properties` porte l'hôte du serveur (`mosip.hostname`), l'URL de mise à jour
+et les réglages CEIN par défaut du poste. Ces deux fichiers sont chargés au démarrage
+comme valeurs par défaut ; les paramètres synchronisés depuis le serveur passent par-dessus.
+
+`environment=LOCAL` est nécessaire tant que des JAR sont remplacés à la main : en dehors de
+`LOCAL`, le client vérifie la signature et le checksum de chaque JAR par rapport au manifeste
+du serveur, et re-télécharge ceux qui ne correspondent pas.
+
+Clés présentes dans l'ancien JAR mais lues nulle part dans MOSIP 1.2.0.2, donc retirées :
+`mosip.registration.language.primary`, `.secondary`, `mosip.registration.languages`,
+`mosip.registration.mdm_enabled_langs`, `mosip.primary.language`,
+`mosip.registration.default.language`, `mosip.registration.ui.language`,
+`mosip.registration.location.lang`, `mosip.registration.master.lang`,
+`mosip.registration.multilang.enabled`, `mosip.registration.language.fallback.enabled`,
+`mosip.mdm.enabled`, `mosip.registration.device.biometrics.enabled`,
+`mosip.registration.mds.fingerprint.capture.enable.flag`,
+`mosip.registration.device.fingerprint.provider`. La langue est gérée par
+`mosip.mandatory-languages=fra` et `mosip.registration.cein.forced-language=fra`.
+
+### Générer les JAR
+
+```bash
+export JAVA_HOME=/chemin/vers/jdk-11
+tools/build-dist.sh sandbox
+```
+
+Le résultat est dans `dist/sandbox/` : les deux JAR et `SHA256SUMS`. Copiez-les dans `lib/`
+du client (en remplaçant les existants), puis lancez `run.bat`.
+
 ## Build
 
 ```bash

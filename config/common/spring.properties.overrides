@@ -1,0 +1,6 @@
+# Cles remplacees dans spring.properties de registration-services-1.2.0.2.jar,
+# pour tous les environnements. Valeurs par defaut ; le serveur peut les surcharger.
+mosip.mandatory-languages=fra
+mosip.optional-languages=
+mosip.min-languages.count=1
+mosip.max-languages.count=1
