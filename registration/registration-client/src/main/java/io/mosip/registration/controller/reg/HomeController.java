@@ -5,6 +5,7 @@ import static io.mosip.registration.constants.RegistrationConstants.APPLICATION_
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import io.mosip.registration.constants.RegistrationConstants;
 import io.mosip.registration.constants.RegistrationUIConstants;
 import io.mosip.registration.context.SessionContext;
 import io.mosip.registration.controller.BaseController;
+import io.mosip.registration.enums.Role;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.GridPane;
@@ -53,6 +55,14 @@ public class HomeController extends BaseController implements Initializable {
 
 			LOGGER.info("REGISTRATION - REGSITRATION_HOME_PAGE_LAYOUT", APPLICATION_NAME, APPLICATION_ID,
 					"Constructing Registration Home Page");
+
+			// CEIN: only DEFAULT users go through the onboarding screen
+			List<String> userRoles = SessionContext.userContext().getRoles();
+			if (!Role.isDefaultUser(userRoles)) {
+				LOGGER.info("Mayoro: Non-DEFAULT user detected, clearing onboard flags");
+				SessionContext.map().put(RegistrationConstants.ONBOARD_USER, false);
+				SessionContext.map().put(RegistrationConstants.ONBOARD_USER_UPDATE, false);
+			}
 
 			if ((boolean) SessionContext.map().get(RegistrationConstants.ONBOARD_USER)
 					&& !(boolean) SessionContext.map()
