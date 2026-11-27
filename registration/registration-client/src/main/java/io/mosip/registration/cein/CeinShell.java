@@ -60,10 +60,37 @@ public final class CeinShell {
 			shell.setLeft(buildNav(activeKey(screen.getId()), isSupervisor()));
 			fill(screen);
 			shell.setCenter(screen);
+			setTitle(screen, titleFor(screen.getId()));
 			return shell;
 		} catch (RuntimeException e) {
 			LOGGER.error("CEIN shell not applied", e);
 			return screen;
+		}
+	}
+
+	/** Page title shown in the top bar (Header.fxml) of the given screen. */
+	public static void setTitle(Node screen, String title) {
+		if (screen == null || title == null) {
+			return;
+		}
+		Node label = screen.lookup("#ceinPageTitle");
+		if (label instanceof Label) {
+			((Label) label).setText(title);
+		}
+	}
+
+	private static String titleFor(String id) {
+		if (id == null) return null;
+		switch (id) {
+		case "mainBox": return label("ceinHomeTitle", "Accueil");
+		case "uploadPacketRoot": return label("ceinTitlePackets", "Envoi des paquets");
+		case "eodRoot": return label("ceinTitleApproval", "Approbation");
+		case "reRegistrationRootPane": return label("ceinTitleReregistration", "Réinscription");
+		case "syncDataPaneId": return label("ceinTitleSync", "Synchronisation");
+		case "dashBoardRootPane": return label("ceinTitleDashboard", "Tableau de bord");
+		case "onBoardRoot": return label("ceinTitleOnboard", "Enrôlement de l'opérateur");
+		case "deviceSettingsRoot": case "configSettingsRoot": case "jobSettingsRoot": return label("ceinTitleSettings", "Paramètres");
+		default: return null;
 		}
 	}
 

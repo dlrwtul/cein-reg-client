@@ -1,220 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 
-<GridPane fx:id="headerParent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="1000.0" styleClass="headerParentBorder" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.mosip.registration.controller.reg.HeaderController">
+<!-- CEIN: top bar of the logged-in screens (design "Topbar"): page title, network status and last
+     synchronisation, device shortcuts, user menu (MOSIP menu items: operations, user guide, reset
+     password, logout). The centre and the machine are shown at the bottom of the navigation.
+     Every fx:id / handler of HeaderController is kept. -->
+<GridPane fx:id="headerParent" hgap="16.0" styleClass="ceinTopbar" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
+  fx:controller="io.mosip.registration.controller.reg.HeaderController">
   <columnConstraints>
-      <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" minWidth="10.0" percentWidth="5.0" prefWidth="30.0" />
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="171.0" minWidth="10.0" percentWidth="3.0" prefWidth="157.0" />
-      <ColumnConstraints hgrow="SOMETIMES" percentWidth="82.0" />
-      <ColumnConstraints hgrow="SOMETIMES" percentWidth="10.0" />
+    <ColumnConstraints hgrow="ALWAYS" minWidth="120.0" />
+    <ColumnConstraints />
+    <ColumnConstraints />
+    <ColumnConstraints />
   </columnConstraints>
   <rowConstraints>
-    <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="64.0" valignment="CENTER" />
   </rowConstraints>
-   <children>
-      <ImageView fx:id="mosipLogo" fitHeight="25.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="LEFT">
-         <image>
-            <Image url="@../images/logo-final-small.png" />
-         </image>
-         <GridPane.margin>
-            <Insets left="22.0" />
-         </GridPane.margin>
-      </ImageView>
-      <GridPane styleClass="headerDetails" GridPane.columnIndex="2">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="2.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="15.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="2.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="41.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" percentHeight="100.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <GridPane alignment="CENTER_LEFT" GridPane.halignment="LEFT">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Label fx:id="registrationOfficerName" graphicTextGap="10.0" text="%roname" GridPane.halignment="LEFT">
-                     <graphic>
-                        <ImageView fx:id="userImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/User.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <GridPane.margin>
-                        <Insets left="5.0" />
-                     </GridPane.margin>
-                  </Label>
-               </children>
-            </GridPane>
-            <GridPane alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="81.0" GridPane.columnIndex="2">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Label fx:id="registrationOfficeLocation" graphicTextGap="10.0" text="%rooffice" GridPane.halignment="LEFT">
-                     <graphic>
-                        <ImageView fx:id="regCenterLocationImgView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/RegCentreLocation.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Label>
-               </children>
-            </GridPane>
-            <GridPane GridPane.columnIndex="3">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Label fx:id="registrationOfficeId" graphicTextGap="10.0" text="%roid" GridPane.halignment="LEFT">
-                     <graphic>
-                        <ImageView fx:id="registrationOfficeIdImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/system.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <GridPane.margin>
-                        <Insets left="10.0" />
-                     </GridPane.margin>
-                  </Label>
-               </children>
-               <GridPane.margin>
-                  <Insets bottom="2.5" top="2.5" />
-               </GridPane.margin>
-            </GridPane>
-            <GridPane GridPane.columnIndex="5">
-              <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="2.0" />
-                <ColumnConstraints hgrow="SOMETIMES" percentWidth="98.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <HBox fx:id="settingsHBox" alignment="CENTER_LEFT" spacing="25.0" GridPane.columnIndex="1" />
-               </children>
-               <GridPane.margin>
-                  <Insets bottom="2.5" right="5.0" top="2.5" />
-               </GridPane.margin>
-            </GridPane>
-            <GridPane fx:id="hederSeparator" GridPane.columnIndex="1">
-               <children>
-                  <Line endY="${hederSeparator.height/2.5}" stroke="WHITE" styleClass="splitLineSeparator" GridPane.halignment="CENTER" />
-               </children>
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="30.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-               </rowConstraints>
-            </GridPane>
-            <GridPane fx:id="hederSeparator1" GridPane.columnIndex="4">
-               <children>
-                  <Line endY="${hederSeparator.height/2.5}" stroke="WHITE" styleClass="splitLineSeparator" GridPane.halignment="CENTER" />
-               </children>
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
-               </rowConstraints>
-            </GridPane>
-         </children>
-      </GridPane>
-      <GridPane GridPane.columnIndex="3">
-        <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" percentWidth="2.0" />
-            <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0" />
-            <ColumnConstraints hgrow="SOMETIMES" percentWidth="3.0" />
-          <ColumnConstraints hgrow="SOMETIMES" percentWidth="90.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="3">
-               <children>
-                  <HBox fx:id="settingsIconHBox" alignment="CENTER" visible="false">
-                     <children>
-                        <ImageView fitHeight="25.0" fitWidth="25.0" onMouseClicked="#openSettings" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/settings.png" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </HBox>
-                  <MenuBar fx:id="menu" styleClass="menuBar" GridPane.columnIndex="1">
-                     <menus>
-                        <Menu fx:id="homeSelectionMenu" mnemonicParsing="false" onAction="#closeOperations">
-                           <graphic>
-                              <ImageView fx:id="homeSelectionMenuImageView" fitHeight="20.0" fitWidth="20.0" layoutX="20.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/hamburger.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                           <items>
-                           	<MenuItem fx:id="userGuide" mnemonicParsing="false" onAction="#userGuide" text="%userGuide" />
-                              <SeparatorMenuItem />
-                              <MenuItem fx:id="resetPword" mnemonicParsing="false" onAction="#resetPword" text="%resetPassword" />
-                              <SeparatorMenuItem />
-                              <MenuItem fx:id="logout" mnemonicParsing="false" onAction="#logout" text="%logout" />
-                           </items>
-                        </Menu>
-                     </menus>
-                  </MenuBar>
-               </children>
+  <children>
+    <Label fx:id="ceinPageTitle" minWidth="0.0" styleClass="ceinTopbarTitle" text="%ceinHomeTitle" />
+
+    <!-- network status and last synchronisation -->
+    <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="ceinTopbarStatus" GridPane.columnIndex="1">
+      <children>
+        <StackPane>
+          <children>
+            <HBox fx:id="online" alignment="CENTER_LEFT" managed="${online.visible}" spacing="8.0">
+              <children>
+                <SVGPath content="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h0M1.5 9a15 15 0 0 1 21 0" styleClass="ceinIconStroke" />
+                <Label styleClass="ceinTopbarStatusText" text="%ceinOnline" />
+                <ImageView fx:id="availableIcon1" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+              </children>
             </HBox>
-            <HBox fx:id="online" alignment="CENTER" GridPane.columnIndex="1">
-               <children>
-                  <ImageView fx:id="availableIcon1" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/Online.png" />
-                     </image>
-                  </ImageView>
-               </children>
+            <HBox fx:id="offline" alignment="CENTER_LEFT" managed="${offline.visible}" spacing="8.0" visible="false">
+              <children>
+                <SVGPath content="M2 2l20 20M8.5 16a5 5 0 0 1 7 0M12 19.5h0M5 12.5a10 10 0 0 1 5-2.7M1.5 9a15 15 0 0 1 4.5-3M19 12.5a10 10 0 0 0-2.4-1.7M22.5 9a15 15 0 0 0-11-4.4" styleClass="ceinIconStroke, ceinIconDanger" />
+                <Label styleClass="ceinTopbarStatusText, ceinTopbarOffline" text="%ceinOffline" />
+                <ImageView fx:id="availableIcon" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+              </children>
             </HBox>
-            <HBox fx:id="offline" alignment="CENTER" GridPane.columnIndex="1">
-               <children>
-                  <ImageView fx:id="availableIcon" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/Offline.png" />
-                     </image>
-                  </ImageView>
-               </children>
-            </HBox>
-         </children>
-         <GridPane.margin>
-            <Insets />
-         </GridPane.margin>
-      </GridPane>
-      <ImageView fx:id="homeImgView" fitHeight="23.0" fitWidth="28.0" onMousePressed="#redirectHome" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1">
-      <image>
-            <Image url="@../images/Home-small.png" />
-         </image>
-      </ImageView>
-   </children>
+          </children>
+        </StackPane>
+        <Label fx:id="ceinLastSync" styleClass="ceinTopbarStatusText" />
+      </children>
+    </HBox>
+
+    <!-- device shortcuts created from the settings (MOSIP) -->
+    <HBox fx:id="settingsHBox" alignment="CENTER_LEFT" spacing="16.0" GridPane.columnIndex="2" />
+
+    <!-- user menu -->
+    <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="3">
+      <children>
+        <MenuBar fx:id="menu" styleClass="menuBar, ceinUserMenuBar">
+          <menus>
+            <Menu fx:id="homeSelectionMenu" mnemonicParsing="false" onAction="#closeOperations" styleClass="ceinUserMenu">
+              <graphic>
+                <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="ceinUserPill">
+                  <children>
+                    <StackPane styleClass="ceinAvatar">
+                      <children>
+                        <Label fx:id="ceinUserInitials" styleClass="ceinAvatarText" />
+                      </children>
+                    </StackPane>
+                    <Label fx:id="registrationOfficerName" styleClass="ceinUserName" text="%roname" />
+                    <SVGPath content="M6 9l6 6 6-6" styleClass="ceinIconStroke" />
+                    <ImageView fx:id="homeSelectionMenuImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                  </children>
+                </HBox>
+              </graphic>
+              <items>
+                <MenuItem fx:id="userGuide" mnemonicParsing="false" onAction="#userGuide" text="%userGuide" />
+                <SeparatorMenuItem />
+                <MenuItem fx:id="resetPword" mnemonicParsing="false" onAction="#resetPword" text="%resetPassword" />
+                <SeparatorMenuItem />
+                <MenuItem fx:id="logout" mnemonicParsing="false" onAction="#logout" text="%logout" />
+              </items>
+            </Menu>
+          </menus>
+        </MenuBar>
+      </children>
+    </HBox>
+
+    <!-- MOSIP header items shown elsewhere in the CEIN layout (navigation: home, settings, centre, machine) -->
+    <VBox managed="false" visible="false">
+      <children>
+        <HBox fx:id="settingsIconHBox" visible="false">
+          <children>
+            <ImageView fitHeight="1.0" fitWidth="1.0" onMouseClicked="#openSettings" />
+          </children>
+        </HBox>
+        <ImageView fx:id="mosipLogo" fitHeight="1.0" fitWidth="1.0" />
+        <ImageView fx:id="homeImgView" fitHeight="1.0" fitWidth="1.0" onMousePressed="#redirectHome" />
+        <Label fx:id="registrationOfficeLocation" text="%rooffice">
+          <graphic><ImageView fx:id="regCenterLocationImgView" fitHeight="1.0" fitWidth="1.0" /></graphic>
+        </Label>
+        <Label fx:id="registrationOfficeId" text="%roid">
+          <graphic><ImageView fx:id="registrationOfficeIdImageView" fitHeight="1.0" fitWidth="1.0" /></graphic>
+        </Label>
+        <ImageView fx:id="userImageView" fitHeight="1.0" fitWidth="1.0" />
+      </children>
+    </VBox>
+  </children>
 </GridPane>

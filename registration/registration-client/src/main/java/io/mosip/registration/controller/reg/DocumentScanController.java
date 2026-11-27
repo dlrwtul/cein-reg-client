@@ -157,32 +157,54 @@ public class DocumentScanController extends BaseController {
 	 * This method is to select the device and initialize document scan pop-up
 	 */
 	private void initializeAndShowScanPopup(boolean isPreviewOnly) {
+		initializeAndShowScanPopup(isPreviewOnly, false);
+	}
+
+	/**
+	 * CEIN: viewing a captured document or importing a file does not need a scanner, the window
+	 * opens without device in that case (scan / live view disabled).
+	 */
+	private boolean initializeAndShowScanPopup(boolean isPreviewOnly, boolean importOnly) {
 		List<DocScanDevice> devices = docScannerFacade.getConnectedDevices();
 		LOGGER.info("Connected devices : {}", devices);
 
-		if (devices.isEmpty()) {
-			generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.NO_DEVICE_FOUND));
-			return;
+		DocScanDevice device = null;
+		if (!devices.isEmpty()) {
+			selectedScanDeviceName = selectedScanDeviceName == null ? devices.get(0).getId() : selectedScanDeviceName;
+			Optional<DocScanDevice> result = devices.stream().filter(d -> d.getId().equals(selectedScanDeviceName)).findFirst();
+			LOGGER.info("Selected device name : {}", selectedScanDeviceName);
+			device = result.orElse(null);
 		}
 
-		selectedScanDeviceName = selectedScanDeviceName == null ? devices.get(0).getId() : selectedScanDeviceName;
-		Optional<DocScanDevice> result = devices.stream().filter(d -> d.getId().equals(selectedScanDeviceName)).findFirst();
-		LOGGER.info("Selected device name : {}", selectedScanDeviceName);
-
-		if(!result.isPresent()) {
+		if (device == null && !isPreviewOnly && !importOnly) {
 			LOGGER.info("No devices found for the selected device name : {}", selectedScanDeviceName);
 			generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.NO_DEVICE_FOUND));
-			return;
+			return false;
 		}
 
-		scanPopUpViewController.docScanDevice = result.get();
-		scanPopUpViewController.init(this,
-				RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.SCAN_DOC_TITLE));
+		scanPopUpViewController.docScanDevice = device;
+		String title = (fxControl instanceof io.mosip.registration.util.control.impl.DocumentFxControl)
+				? ((io.mosip.registration.util.control.impl.DocumentFxControl) fxControl).getScanTitle()
+				: RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.SCAN_DOC_TITLE);
+		scanPopUpViewController.init(this, title);
 
 		if(isPreviewOnly)
 			scanPopUpViewController.setUpPreview();
-		/*else
-			scanPopUpViewController.docScanDevice = result.get();*/
+		return true;
+	}
+
+	/** CEIN: opens the document window and the file chooser directly ("Importer"). */
+	public void importDocument(String fieldId, FxControl fxControl) {
+		try {
+			this.fxControl = fxControl;
+			loadDataIntoScannedPages(fieldId);
+			if (initializeAndShowScanPopup(false, true)) {
+				scanPopUpViewController.browseNow();
+			}
+		} catch (IOException exception) {
+			LOGGER.error(exception.getMessage(), exception);
+			generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.SCAN_DOCUMENT_ERROR));
+		}
 	}
 
 	public List<BufferedImage> getScannedPages() {

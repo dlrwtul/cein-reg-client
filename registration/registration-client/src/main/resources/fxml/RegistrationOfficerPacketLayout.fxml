@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 
-<!-- CEIN: operator home. Every fx:id / handler used by PacketHandlerController is kept.
-     Registration process tiles are added by the controller in registrationGridPane. -->
+<!-- CEIN: operator home (design "Accueil"). Every fx:id / handler used by PacketHandlerController is
+     kept. Registration process tiles are added by the controller in registrationGridPane. -->
 <GridPane fx:id="homeContent" styleClass="homeContent, ceinPage" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="io.mosip.registration.controller.reg.PacketHandlerController">
   <columnConstraints>
@@ -31,7 +32,7 @@
 
             <VBox spacing="4.0">
               <children>
-                <Label styleClass="ceinTitle" text="%ceinHomeTitle" />
+                <Label fx:id="ceinGreeting" styleClass="ceinTitle" text="%ceinHomeTitle" />
                 <Label styleClass="ceinSubtitle" text="%ceinHomeSubtitle" />
               </children>
             </VBox>
@@ -46,100 +47,139 @@
             <!-- registration processes (dynamic, one tile per active process spec) -->
             <VBox spacing="12.0">
               <children>
-                <HBox alignment="BASELINE_LEFT" spacing="12.0">
+                <FlowPane hgap="12.0" vgap="4.0">
                   <children>
-                    <Label styleClass="ceinEyebrow" text="%registrationTasks" />
+                    <Label styleClass="ceinOverline, ceinHomeSection" text="%ceinHomeRegistration" />
                     <Label styleClass="ceinMuted" text="%ceinHomeProcessesHint" />
                   </children>
-                </HBox>
+                </FlowPane>
                 <GridPane fx:id="registrationGridPane" hgap="16.0" vgap="16.0" />
               </children>
             </VBox>
 
-            <HBox spacing="16.0">
+            <GridPane hgap="16.0" vgap="16.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" />
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints valignment="TOP" />
+              </rowConstraints>
               <children>
 
                 <!-- operational tasks -->
-                <VBox styleClass="ceinCard, ceinHomeList" HBox.hgrow="ALWAYS">
+                <VBox maxHeight="-Infinity" styleClass="ceinCard, ceinHomeList">
                   <children>
-                    <Label maxWidth="Infinity" styleClass="ceinEyebrow, ceinHomeListTitle" text="%operationalTasks" />
-
-                    <GridPane fx:id="syncDataPane" onMouseClicked="#syncData" styleClass="ceinHomeRow">
+                    <Label maxWidth="Infinity" styleClass="ceinOverline, ceinHomeListTitle" text="%ceinHomeOperational" />
+                    <GridPane fx:id="syncDataPane" hgap="14.0" onMouseClicked="#syncData" styleClass="ceinHomeRow">
                       <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
+                        <ColumnConstraints minWidth="24.0" />
                         <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
                       </columnConstraints>
                       <children>
-                        <ImageView fx:id="syncDataImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="syncDataImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M20 11a8 8 0 0 0-14.6-4.5L3 9M3 4v5h5M4 13a8 8 0 0 0 14.6 4.5L21 15M21 20v-5h-5" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
                         <VBox spacing="2.0" GridPane.columnIndex="1">
                           <children>
                             <Label styleClass="ceinHomeRowTitle" text="%synchronizeData" />
                             <HBox spacing="4.0">
                               <children>
-                                <Label styleClass="ceinMuted" text="%lastsynctemp" />
+                                <Label styleClass="ceinMuted" text="%ceinLastSyncPrefix" />
                                 <Label fx:id="lastSyncTime" styleClass="ceinMuted" />
                               </children>
                             </HBox>
                             <GridPane fx:id="progressPane" managed="${progressPane.visible}" visible="false">
-                              <children>
-                                <ProgressBar fx:id="syncProgressBar" maxWidth="Infinity" prefHeight="6.0" progress="0.0" />
-                              </children>
                               <columnConstraints>
                                 <ColumnConstraints hgrow="ALWAYS" />
                               </columnConstraints>
+                              <children>
+                                <ProgressBar fx:id="syncProgressBar" maxWidth="Infinity" prefHeight="6.0" progress="0.0" />
+                              </children>
                             </GridPane>
                           </children>
                         </VBox>
+                        <SVGPath content="M9 6l6 6-6 6" styleClass="ceinIconStroke, ceinHomeChevron" GridPane.columnIndex="2" />
                       </children>
                     </GridPane>
-
-                    <GridPane fx:id="uploadPacketPane" onMouseClicked="#uploadPacketToServer" styleClass="ceinHomeRow">
+                    <GridPane fx:id="downloadPreRegDataPane" hgap="14.0" onMouseClicked="#downloadPreRegData" styleClass="ceinHomeRow">
                       <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
+                        <ColumnConstraints minWidth="24.0" />
                         <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
                       </columnConstraints>
                       <children>
-                        <ImageView fx:id="uploadPacketImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label styleClass="ceinHomeRowTitle" text="%uploadpacket" GridPane.columnIndex="1" />
-                      </children>
-                    </GridPane>
-
-                    <GridPane fx:id="downloadPreRegDataPane" onMouseClicked="#downloadPreRegData" styleClass="ceinHomeRow">
-                      <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
-                        <ColumnConstraints hgrow="ALWAYS" />
-                        <ColumnConstraints />
-                      </columnConstraints>
-                      <children>
-                        <ImageView fx:id="downloadPreRegDataImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="downloadPreRegDataImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M14 3H6v18h12V7zM14 3v4h4M12 11v6M9.5 14.5L12 17l2.5-2.5" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
                         <VBox spacing="2.0" GridPane.columnIndex="1">
                           <children>
                             <Label styleClass="ceinHomeRowTitle" text="%downloadPreregistrationData" />
-                            <Label fx:id="lastPreRegPacketDownloadedTime" styleClass="ceinMuted" />
+                            <Label fx:id="lastPreRegPacketDownloadedTime" styleClass="ceinMuted" text="%ceinPreRegDownloadHint" />
                           </children>
                         </VBox>
-                        <ImageView fx:id="inProgressImage" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" />
+                        <HBox alignment="CENTER_RIGHT" spacing="8.0" GridPane.columnIndex="2">
+                          <children>
+                            <ImageView fx:id="inProgressImage" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true" />
+                            <SVGPath content="M9 6l6 6-6 6" styleClass="ceinIconStroke, ceinHomeChevron" />
+                          </children>
+                        </HBox>
                       </children>
                     </GridPane>
-
-                    <GridPane fx:id="checkUpdatesPane" onMouseClicked="#hasUpdate" styleClass="ceinHomeRow">
+                    <GridPane fx:id="uploadPacketPane" hgap="14.0" onMouseClicked="#uploadPacketToServer" styleClass="ceinHomeRow">
                       <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
+                        <ColumnConstraints minWidth="24.0" />
                         <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
                       </columnConstraints>
                       <children>
-                        <ImageView fx:id="checkUpdatesImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="uploadPacketImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
+                        <VBox spacing="2.0" GridPane.columnIndex="1">
+                          <children>
+                            <Label styleClass="ceinHomeRowTitle" text="%uploadpacket" />
+                            <Label styleClass="ceinMuted" text="%ceinUploadHint" />
+                          </children>
+                        </VBox>
+                        <Label fx:id="ceinUploadCount" styleClass="ceinHomeCount" GridPane.columnIndex="2" />
+                      </children>
+                    </GridPane>
+                    <GridPane fx:id="checkUpdatesPane" hgap="14.0" onMouseClicked="#hasUpdate" styleClass="ceinHomeRow">
+                      <columnConstraints>
+                        <ColumnConstraints minWidth="24.0" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
+                      </columnConstraints>
+                      <children>
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="checkUpdatesImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M12 3v12M7 10l5 5 5-5M4 19h16" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
                         <VBox spacing="2.0" GridPane.columnIndex="1">
                           <children>
                             <Label fx:id="checkUpdates" styleClass="ceinHomeRowTitle" text="%checkUpdates" />
                             <HBox spacing="4.0">
                               <children>
-                                <Label styleClass="ceinMuted" text="%regClientVersion" />
+                                <Label styleClass="ceinMuted" text="%ceinInstalledVersion" />
                                 <Label fx:id="versionValueLabel" styleClass="ceinMuted" />
                               </children>
                             </HBox>
                           </children>
                         </VBox>
+                        <SVGPath content="M9 6l6 6-6 6" styleClass="ceinIconStroke, ceinHomeChevron" GridPane.columnIndex="2" />
                       </children>
                     </GridPane>
 
@@ -147,79 +187,98 @@
                          (operator onboarding skipped, centre remap handled by the admin) -->
                     <GridPane fx:id="updateOperatorBiometricsPane" managed="false" onMouseClicked="#onBoardUser" styleClass="ceinHomeRow" visible="false">
                       <children>
-                        <ImageView fx:id="updateOperatorBiometricsImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <VBox GridPane.columnIndex="1">
-                          <children>
-                            <Label styleClass="ceinHomeRowTitle" text="%updateOperatorBiometrics" />
-                            <Label fx:id="lastBiometricTime" styleClass="ceinMuted" />
-                          </children>
-                        </VBox>
+                        <ImageView fx:id="updateOperatorBiometricsImageView" fitHeight="1.0" fitWidth="1.0" />
+                        <Label fx:id="lastBiometricTime" GridPane.columnIndex="1" />
                       </children>
                     </GridPane>
                     <GridPane fx:id="centerRemapPane" managed="false" onMouseClicked="#intiateRemapProcess" styleClass="ceinHomeRow" visible="false">
                       <children>
-                        <ImageView fx:id="remapImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label styleClass="ceinHomeRowTitle" text="%remap" GridPane.columnIndex="1" />
+                        <ImageView fx:id="remapImageView" fitHeight="1.0" fitWidth="1.0" />
                       </children>
                     </GridPane>
                   </children>
                 </VBox>
 
                 <!-- end of day: supervisor only (hidden by the controller otherwise) -->
-                <GridPane fx:id="eodProcessGridPane" managed="${eodProcessGridPane.visible}" styleClass="ceinCard, ceinHomeList" HBox.hgrow="ALWAYS">
+                <GridPane fx:id="eodProcessGridPane" managed="${eodProcessGridPane.visible}" maxHeight="-Infinity" styleClass="ceinCard, ceinHomeList" GridPane.columnIndex="1">
                   <columnConstraints>
                     <ColumnConstraints hgrow="ALWAYS" />
                   </columnConstraints>
                   <children>
-                    <Label fx:id="eodLabel" maxWidth="Infinity" styleClass="ceinEyebrow, ceinHomeListTitle" text="%endofDayProcesses" />
-
-                    <GridPane fx:id="eodApprovalPane" onMouseClicked="#approvePacket" styleClass="ceinHomeRow" GridPane.rowIndex="1">
+                    <Label fx:id="eodLabel" maxWidth="Infinity" styleClass="ceinOverline, ceinHomeListTitle" text="%ceinHomeEod" />
+                    <GridPane fx:id="eodApprovalPane" hgap="14.0" onMouseClicked="#approvePacket" styleClass="ceinHomeRow" GridPane.rowIndex="1">
                       <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
+                        <ColumnConstraints minWidth="24.0" />
                         <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
                       </columnConstraints>
                       <children>
-                        <ImageView fx:id="eodApprovalImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="eodApprovalImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M9 12l2 2 4-4M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
                         <VBox spacing="2.0" GridPane.columnIndex="1">
                           <children>
-                            <Label styleClass="ceinHomeRowTitle" text="%pendingapproval" />
-                            <Label fx:id="pendingApprovalCountLbl" styleClass="ceinMuted" />
+                            <Label styleClass="ceinHomeRowTitle" text="%ceinApprovalTitle" />
+                            <Label styleClass="ceinMuted" text="%ceinApprovalHint" />
+                            <Label fx:id="pendingApprovalCountLbl" managed="false" visible="false" />
                           </children>
                         </VBox>
+                        <Label fx:id="ceinApprovalCount" styleClass="ceinHomeCount" GridPane.columnIndex="2" />
                       </children>
                     </GridPane>
-
-                    <GridPane fx:id="reRegistrationPane" onMouseClicked="#loadReRegistrationScreen" styleClass="ceinHomeRow" GridPane.rowIndex="2">
+                    <GridPane fx:id="reRegistrationPane" hgap="14.0" onMouseClicked="#loadReRegistrationScreen" styleClass="ceinHomeRow" GridPane.rowIndex="2">
                       <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
+                        <ColumnConstraints minWidth="24.0" />
                         <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
                       </columnConstraints>
                       <children>
-                        <ImageView fx:id="reRegistrationImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="reRegistrationImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M4 4h16v12H8l-4 4zM9 9h6M9 12h4" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
                         <VBox spacing="2.0" GridPane.columnIndex="1">
                           <children>
                             <Label styleClass="ceinHomeRowTitle" text="%reRegistration" />
-                            <Label fx:id="reRegistrationCountLbl" styleClass="ceinMuted" />
+                            <Label styleClass="ceinMuted" text="%ceinReRegHint" />
+                            <Label fx:id="reRegistrationCountLbl" managed="false" visible="false" />
                           </children>
                         </VBox>
+                        <Label fx:id="ceinReRegCount" styleClass="ceinHomeCount" GridPane.columnIndex="2" />
                       </children>
                     </GridPane>
-
-                    <GridPane fx:id="dashBoardPane" onMouseClicked="#viewDashBoard" styleClass="ceinHomeRow" GridPane.rowIndex="3">
+                    <GridPane fx:id="dashBoardPane" hgap="14.0" onMouseClicked="#viewDashBoard" styleClass="ceinHomeRow" GridPane.rowIndex="3">
                       <columnConstraints>
-                        <ColumnConstraints minWidth="40.0" />
+                        <ColumnConstraints minWidth="24.0" />
                         <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints halignment="RIGHT" />
                       </columnConstraints>
                       <children>
-                        <ImageView fx:id="viewReportsImageView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label styleClass="ceinHomeRowTitle" text="%dashBoard" GridPane.columnIndex="1" />
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="viewReportsImageView" fitHeight="1.0" fitWidth="1.0" managed="false" visible="false" />
+                            <SVGPath content="M4 20V10M10 20V4M16 20v-7M22 20H2" styleClass="ceinIconStroke, ceinHomeIcon" />
+                          </children>
+                        </StackPane>
+                        <VBox spacing="2.0" GridPane.columnIndex="1">
+                          <children>
+                            <Label styleClass="ceinHomeRowTitle" text="%dashBoard" />
+                            <Label styleClass="ceinMuted" text="%ceinDashboardHint" />
+                          </children>
+                        </VBox>
+                        <SVGPath content="M9 6l6 6-6 6" styleClass="ceinIconStroke, ceinHomeChevron" GridPane.columnIndex="2" />
                       </children>
                     </GridPane>
+
                   </children>
                 </GridPane>
-
               </children>
-            </HBox>
+            </GridPane>
 
             <ProgressIndicator fx:id="progressIndicator" managed="${progressIndicator.visible}" maxHeight="40.0" maxWidth="40.0" visible="false" />
           </children>

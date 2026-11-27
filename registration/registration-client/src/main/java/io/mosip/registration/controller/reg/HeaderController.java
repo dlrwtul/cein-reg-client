@@ -153,6 +153,14 @@ public class HeaderController extends BaseController {
 	@FXML
 	private HBox settingsIconHBox;
 
+	// CEIN top bar
+	@FXML
+	private Label ceinPageTitle;
+	@FXML
+	private Label ceinUserInitials;
+	@FXML
+	private Label ceinLastSync;
+
 	@Autowired
 	private JobConfigurationService jobConfigurationService;
 
@@ -225,6 +233,17 @@ public class HeaderController extends BaseController {
 		setImage(homeImgView	, RegistrationConstants.HOME_IMG);
 
 		registrationOfficerName.setText(SessionContext.userContext().getName());
+		if (ceinUserInitials != null) {
+			ceinUserInitials.setText(io.mosip.registration.cein.CeinStatus.initials(SessionContext.userContext().getName()));
+		}
+		if (ceinLastSync != null) {
+			ceinLastSync.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(() -> {
+				String last = io.mosip.registration.cein.CeinStatus.lastSyncProperty().get();
+				return last == null || last.isBlank() || "---".equals(last) ? ""
+						: java.text.MessageFormat.format(ApplicationContext.getInstance().getApplicationLanguageLabelBundle()
+								.getString("ceinLastSyncShort"), last);
+			}, io.mosip.registration.cein.CeinStatus.lastSyncProperty()));
+		}
 		registrationOfficeId.setText(RegistrationSystemPropertiesChecker.getMachineId());
 		registrationOfficeLocation
 				.setText(SessionContext.userContext().getRegistrationCenterDetailDTO().getRegistrationCenterName() + " ("

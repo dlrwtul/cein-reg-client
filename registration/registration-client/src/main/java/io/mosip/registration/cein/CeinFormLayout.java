@@ -60,6 +60,7 @@ public final class CeinFormLayout {
 				for (Node added : c.getAddedSubList()) {
 					added.visibleProperty().addListener(relayout);
 					added.managedProperty().addListener(relayout);
+					markRequired(added);
 				}
 			}
 			relayout(row);
@@ -118,12 +119,121 @@ public final class CeinFormLayout {
 		}
 	}
 
-	/** Number badge shown before each step label. */
+	/**
+	 * Step badge shown before each step label (design "Stepper"): a connector line from the previous
+	 * step, then a circle with the number (to do), the number on green (current) or a check (done).
+	 */
 	public static void numberTab(Tab tab, int number) {
 		Label badge = new Label(String.valueOf(number));
 		badge.getStyleClass().add("ceinStepNumber");
-		StackPane holder = new StackPane(badge);
+		javafx.scene.shape.SVGPath check = new javafx.scene.shape.SVGPath();
+		check.setContent("M5 12 L10 17 L19 7");
+		check.getStyleClass().add("ceinStepCheck");
+		check.setVisible(false);
+		StackPane circle = new StackPane(badge, check);
+		circle.getStyleClass().add("ceinStepCircle");
+		javafx.scene.layout.HBox holder = new javafx.scene.layout.HBox(10);
+		holder.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 		holder.getStyleClass().add("ceinStepNumberHolder");
+		if (number > 1) {
+			Region line = new Region();
+			line.getStyleClass().add("ceinStepLine");
+			holder.getChildren().add(line);
+		}
+		holder.getChildren().add(circle);
 		tab.setGraphic(holder);
+	}
+
+	/** Keeps the done / current / to-do state of the step badges in line with the selected tab. */
+	public static void trackSteps(javafx.scene.control.TabPane tabPane) {
+		InvalidationListener update = o -> {
+			int selected = tabPane.getSelectionModel().getSelectedIndex();
+			for (int i = 0; i < tabPane.getTabs().size(); i++) {
+				Node graphic = tabPane.getTabs().get(i).getGraphic();
+				if (!(graphic instanceof javafx.scene.layout.HBox)) {
+					continue;
+				}
+				graphic.getStyleClass().removeAll("ceinTabDone", "ceinTabCurrent", "ceinTabTodo");
+				graphic.getStyleClass().add(i < selected ? "ceinTabDone" : (i == selected ? "ceinTabCurrent" : "ceinTabTodo"));
+				for (Node child : ((javafx.scene.layout.HBox) graphic).getChildren()) {
+					if (child instanceof StackPane) {
+						((StackPane) child).getChildren().get(0).setVisible(i >= selected);
+						((StackPane) child).getChildren().get(1).setVisible(i < selected);
+					}
+				}
+			}
+		};
+		tabPane.getSelectionModel().selectedIndexProperty().addListener(update);
+		tabPane.getTabs().addListener(update);
+		update.invalidated(null);
+	}
+
+	/** Title and caption of a screen of the process (UI spec label and caption). */
+	public static VBox screenHeader(String title, String caption) {
+		Label titleLabel = new Label(title == null ? "" : title);
+		titleLabel.getStyleClass().add("ceinScreenTitle");
+		titleLabel.setWrapText(true);
+		VBox header = new VBox(2, titleLabel);
+		header.getStyleClass().add("ceinScreenHeader");
+		if (caption != null && !caption.isBlank()) {
+			Label captionLabel = new Label(caption);
+			captionLabel.getStyleClass().add("ceinScreenCaption");
+			captionLabel.setWrapText(true);
+			header.getChildren().add(captionLabel);
+		}
+		return header;
+	}
+
+	/** Column headers of the document rows (same column widths as DocumentFxControl). */
+	public static javafx.scene.layout.GridPane documentHeader(java.util.ResourceBundle labels) {
+		javafx.scene.layout.GridPane header = new javafx.scene.layout.GridPane();
+		header.setHgap(16);
+		header.getStyleClass().add("ceinDocHeader");
+		double[] widths = { 22, 27, 20, 31 };
+		String[] keys = { "ceinDocColCategory", "ceinDocColType", "ceinDocColRef", "ceinDocColFile" };
+		for (int i = 0; i < widths.length; i++) {
+			javafx.scene.layout.ColumnConstraints column = new javafx.scene.layout.ColumnConstraints();
+			column.setPercentWidth(widths[i]);
+			if (i == widths.length - 1) {
+				column.setHalignment(javafx.geometry.HPos.RIGHT);
+			}
+			header.getColumnConstraints().add(column);
+			Label label = new Label(labels.containsKey(keys[i]) ? labels.getString(keys[i]) : keys[i]);
+			label.getStyleClass().add("ceinOverline");
+			header.add(label, i, 0);
+		}
+		return header;
+	}
+
+	/**
+	 * Required fields: MOSIP appends " * " to the field label; the design shows a red asterisk after
+	 * the label. Applied to every label of a field (and again if the label text changes).
+	 */
+	public static void markRequired(Node node) {
+		if (node instanceof Label) {
+			Label label = (Label) node;
+			if (!label.getProperties().containsKey("ceinRequired")) {
+				label.getProperties().put("ceinRequired", true);
+				label.textProperty().addListener((o, oldValue, newValue) -> applyRequired(label));
+			}
+			applyRequired(label);
+		} else if (node instanceof javafx.scene.Parent) {
+			for (Node child : ((javafx.scene.Parent) node).getChildrenUnmodifiable()) {
+				markRequired(child);
+			}
+		}
+	}
+
+	private static void applyRequired(Label label) {
+		String text = label.getText();
+		if (text == null || !text.trim().endsWith("*") || text.trim().equals("*")) {
+			return;
+		}
+		label.setText(text.substring(0, text.lastIndexOf('*')).replaceAll("\\s+$", ""));
+		Label star = new Label("*");
+		star.getStyleClass().add("ceinRequiredStar");
+		label.setGraphic(star);
+		label.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
+		label.setGraphicTextGap(4);
 	}
 }

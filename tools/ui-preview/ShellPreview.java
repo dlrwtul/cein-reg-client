@@ -40,7 +40,8 @@ public class ShellPreview {
 		Platform.runLater(() -> {
 			try {
 				CeinFonts.load();
-				Parent screen = new FXMLLoader(res.resolve("fxml").resolve(a[2] + ".fxml").toUri().toURL(), bundle).load();
+				FXMLLoader loader = new FXMLLoader(res.resolve("fxml").resolve(a[2] + ".fxml").toUri().toURL(), bundle);
+				Parent screen = loader.load();
 				Parent root = CeinShell.preview(screen, a[3], true, Boolean.parseBoolean(a[4]));
 				Scene scene = new Scene(root, 1366, 768);
 				scene.getStylesheets().add(res.resolve("application-cein.css").toUri().toString());
@@ -49,6 +50,11 @@ public class ShellPreview {
 				st.show();
 				root.applyCss();
 				root.layout();
+				if (Boolean.getBoolean("preview.demo")) {
+					PreviewDemo.fill(a[2], screen, bundle, loader.getNamespace());
+					root.applyCss();
+					root.layout();
+				}
 				ImageIO.write(SwingFXUtils.fromFXImage(scene.snapshot(null), null), "png", new File(a[1]));
 				System.out.println("OK " + a[2]);
 			} catch (Throwable t) {

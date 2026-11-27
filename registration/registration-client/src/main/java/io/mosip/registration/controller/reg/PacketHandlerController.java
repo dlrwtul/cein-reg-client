@@ -99,6 +99,16 @@ public class PacketHandlerController extends BaseController implements Initializ
 	@FXML
 	private Label reRegistrationCountLbl;
 
+	// CEIN home (design "Accueil")
+	@FXML
+	private Label ceinGreeting;
+	@FXML
+	private Label ceinUploadCount;
+	@FXML
+	private Label ceinApprovalCount;
+	@FXML
+	private Label ceinReRegCount;
+
 	@FXML
 	private Label lastBiometricTime;
 
@@ -259,6 +269,7 @@ public class PacketHandlerController extends BaseController implements Initializ
 						.valueOf(timestamp2).compareTo(Timestamp.valueOf(timestamp1))).findFirst();
 
 				lastSyncTime.setText(getLocalZoneTime(latestUpdateTime.isPresent() ? latestUpdateTime.get() : null));
+				io.mosip.registration.cein.CeinStatus.setLastSync(lastSyncTime.getText());
 
 				setLastPreRegPacketDownloadedTime();
 			}
@@ -308,6 +319,29 @@ public class PacketHandlerController extends BaseController implements Initializ
 					.getEnrollmentByStatus(RegistrationClientStatusCode.CREATED.getCode());
 
 			List<PacketStatusDTO> reRegisterRegistrations = reRegistrationService.getAllReRegistrationPackets();
+
+			// CEIN: greeting and counters
+			if (ceinGreeting != null && SessionContext.userContext() != null) {
+				String firstName = io.mosip.registration.cein.CeinStatus.firstName(SessionContext.userContext().getName());
+				if (!firstName.isEmpty()) {
+					ceinGreeting.setText(java.text.MessageFormat.format(
+							ApplicationContext.getInstance().getApplicationLanguageLabelBundle().getString("ceinGreeting"), firstName));
+				}
+			}
+			if (ceinApprovalCount != null) {
+				ceinApprovalCount.setText(String.valueOf(pendingApprovalRegistrations.size()));
+				ceinReRegCount.setText(String.valueOf(reRegisterRegistrations.size()));
+			}
+			if (ceinUploadCount != null) {
+				try {
+					java.util.List<?> toUpload = io.mosip.registration.controller.ClientApplication.getApplicationContext()
+							.getBean(io.mosip.registration.service.sync.PacketSynchService.class).fetchPacketsToBeSynched();
+					ceinUploadCount.setText(String.valueOf(toUpload == null ? 0 : toUpload.size()));
+				} catch (RuntimeException exception) {
+					LOGGER.error("Unable to count the packets to upload", exception);
+					ceinUploadCount.setText("");
+				}
+			}
 
 			if (!pendingApprovalRegistrations.isEmpty()) {
 				pendingApprovalCountLbl
@@ -835,49 +869,75 @@ public class PacketHandlerController extends BaseController implements Initializ
 	}
 
 	private GridPane buildRegistrationProcessPane(ProcessSpecDto processSpecDto) {
+		// CEIN (design "Accueil"): icon, process label and caption; the first tile is the main action
 		GridPane gridPane = new GridPane();
 		gridPane.getStyleClass().addAll("operationalPaneDetailsSync", "ceinProcessTile");
+		if (registrationGridPane.getChildren().isEmpty()) {
+			gridPane.getStyleClass().add("ceinProcessTilePrimary");
+		}
 		gridPane.setMaxWidth(Double.MAX_VALUE);
+		gridPane.setMaxHeight(Double.MAX_VALUE);
 		gridPane.setId(processSpecDto.getId());
-		RowConstraints rowConstraints = new RowConstraints();
-		rowConstraints.setPercentHeight(100);
-		gridPane.getRowConstraints().addAll(rowConstraints);
-		ColumnConstraints columnConstraint1 = new ColumnConstraints();
-		columnConstraint1.setPercentWidth(10);
-		ColumnConstraints columnConstraint2 = new ColumnConstraints();
-		columnConstraint2.setPercentWidth(90);
-		gridPane.getColumnConstraints().addAll(columnConstraint1, columnConstraint2);
+		ColumnConstraints columnConstraint = new ColumnConstraints();
+		columnConstraint.setHgrow(javafx.scene.layout.Priority.ALWAYS);
+		gridPane.getColumnConstraints().add(columnConstraint);
 		gridPane.setOnMouseClicked(event -> {
 			selectLanguage(event);
 		});
-		VBox vBox = new VBox();
-		vBox.setAlignment(Pos.CENTER_LEFT);
+		VBox vBox = new VBox(14);
+		vBox.setAlignment(Pos.TOP_LEFT);
+
+		javafx.scene.shape.SVGPath icon = new javafx.scene.shape.SVGPath();
+		icon.setContent(processIcon(processSpecDto.getFlow()));
+		icon.getStyleClass().addAll("ceinIconStroke", "ceinProcessIcon");
+		// MOSIP icon of the process, kept for the node id used by the client (not displayed)
 		ImageView imageView = new ImageView();
 		imageView.setId(processSpecDto.getId()+"_img");
-		imageView.setPreserveRatio(true);
-		imageView.setPickOnBounds(true);
-		imageView.setFitHeight(30);
-		imageView.setFitWidth(30);
-		try {
-			imageView.setImage(getImage(processSpecDto.getIcon(), true));
-		} catch (RegBaseCheckedException e) {
-			LOGGER.error("Failed to get process image", e);
-		}
-		vBox.getChildren().add(imageView);
+		imageView.setManaged(false);
+		imageView.setVisible(false);
+		vBox.getChildren().addAll(new javafx.scene.layout.StackPane(icon, imageView));
 
+		String lang = ApplicationContext.applicationLanguage();
 		Label label = new Label();
-		label.setText(processSpecDto.getLabel().get(ApplicationContext.applicationLanguage()));
+		label.setText(processSpecDto.getLabel().get(lang));
 		label.setWrapText(true);
 		label.getStyleClass().addAll("operationalTitle", "ceinProcessTileTitle");
-		// CEIN: icon above the label, tile takes the whole cell
-		vBox.setSpacing(14);
-		vBox.getChildren().add(label);
+		String caption = processSpecDto.getCaption() == null ? null : processSpecDto.getCaption().get(lang);
+		if (caption == null || caption.isBlank()) {
+			ResourceBundle labels = ApplicationContext.getInstance().getApplicationLanguageLabelBundle();
+			String key = "ceinProcessHint_" + processSpecDto.getFlow();
+			caption = labels.containsKey(key) ? labels.getString(key) : null;
+		}
+		VBox texts = new VBox(4, label);
+		if (caption != null && !caption.isBlank()) {
+			Label captionLabel = new Label(caption);
+			captionLabel.setWrapText(true);
+			captionLabel.getStyleClass().add("ceinProcessTileCaption");
+			texts.getChildren().add(captionLabel);
+		}
+		vBox.getChildren().add(texts);
 		gridPane.addColumn(0, vBox);
 		GridPane.setHgrow(vBox, javafx.scene.layout.Priority.ALWAYS);
 		changeNodeOrientation(gridPane);
 		return gridPane;
 	}
-	
+
+	private static String processIcon(String flow) {
+		if (flow == null) {
+			flow = "";
+		}
+		switch (flow) {
+		case "UPDATE":
+			return "M3 5h18v14H3z M11 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0 M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h3M15 13h3";
+		case "LOST":
+			return "M18 11a7 7 0 1 1-14 0 7 7 0 0 1 14 0 M21 21l-4.3-4.3";
+		case "CORRECTION":
+			return "M12 11v2.5c0 3-1 5.5-2.5 7.5M8 5.6A7 7 0 0 1 19 11v2M5 9a7 7 0 0 0-.4 2.3v2M15.5 13c0 3-.6 5.5-1.8 7.6M8.6 11a3.5 3.5 0 0 1 6.9 0";
+		default:
+			return "M13 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7M19 8v6M16 11h6";
+		}
+	}
+
 	public void selectLanguage(MouseEvent event) {
 		startRegistrationProcess(((GridPane) event.getSource()).getId());
 	}

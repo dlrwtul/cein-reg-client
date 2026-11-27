@@ -3194,7 +3194,6 @@ Working on new Css by taleev
 	-fx-cursor: hand;
 	-fx-background-color: transparent;
 	-fx-alignment: center-left;
-	-fx-hgap: 0;
 }
 .ceinHomeRow:hover { -fx-background-color: #F8FAF9; }
 .ceinHomeRowTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
@@ -3565,3 +3564,114 @@ Working on new Css by taleev
 .ceinAckPaper { -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10, 0, 0, 2); }
 
 .ceinScanHalf { -fx-font-size: 14px; -fx-padding: 0 8 0 8; }
+
+/* ---------- top bar (Header.fxml, design "Topbar") ---------- */
+.ceinTopbar {
+	-fx-background-color: white;
+	-fx-border-color: transparent transparent -cein-line transparent;
+	-fx-border-width: 0 0 1 0;
+	-fx-padding: 0 24 0 32;
+	-fx-min-height: 64;
+	-fx-pref-height: 64;
+}
+.ceinTopbarTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 20px; -fx-text-fill: -cein-ink; -fx-text-overrun: ellipsis; }
+.ceinTopbarStatusText { -fx-font-size: 13px; -fx-text-fill: #3E4C59; }
+.ceinTopbarOffline { -fx-text-fill: -cein-error; }
+.ceinUserMenuBar, .ceinUserMenuBar .menu { -fx-background-color: transparent; -fx-padding: 0; }
+.ceinUserMenuBar .menu:hover, .ceinUserMenuBar .menu:showing { -fx-background-color: transparent; }
+.ceinUserMenuBar .menu > .arrow-button, .ceinUserMenuBar .menu .arrow { -fx-padding: 0; -fx-shape: null; -fx-background-color: transparent; }
+.ceinUserPill {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line;
+	-fx-border-radius: 999;
+	-fx-background-radius: 999;
+	-fx-padding: 3 8 3 4;
+	-fx-min-height: 36;
+}
+.ceinUserMenuBar .menu:hover .ceinUserPill, .ceinUserMenuBar .menu:showing .ceinUserPill { -fx-background-color: -cein-bg; }
+.ceinAvatar {
+	-fx-min-width: 28; -fx-min-height: 28; -fx-max-width: 28; -fx-max-height: 28;
+	-fx-background-color: #0B4D34;
+	-fx-background-radius: 14;
+}
+.ceinAvatarText { -fx-text-fill: white; -fx-font-family: 'Inter SemiBold'; -fx-font-size: 12px; }
+.ceinUserName { -fx-font-size: 14px; -fx-text-fill: -cein-ink; }
+
+/* ---------- flow: steps (design "Stepper"), screen title, footer ---------- */
+.ceinStepNumberHolder { -fx-padding: 0 4 0 0; }
+.ceinStepLine { -fx-min-width: 24; -fx-pref-width: 32; -fx-min-height: 1; -fx-max-height: 1; -fx-background-color: -cein-border; }
+.ceinTabDone .ceinStepLine, .ceinTabCurrent .ceinStepLine { -fx-background-color: -cein-green; }
+.ceinStepCircle {
+	-fx-min-width: 28; -fx-min-height: 28; -fx-max-width: 28; -fx-max-height: 28;
+	-fx-background-radius: 14; -fx-border-radius: 14;
+	-fx-border-color: #9AA6B1; -fx-border-width: 1;
+	-fx-background-color: white;
+}
+.ceinStepNumber, .tab:selected .ceinStepNumber {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-min-width: 0; -fx-min-height: 0;
+	-fx-text-fill: -cein-ink-2;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 13px;
+}
+.ceinTabCurrent .ceinStepCircle { -fx-background-color: -cein-green; -fx-border-color: -cein-green; }
+.ceinTabCurrent .ceinStepNumber { -fx-text-fill: white; }
+.ceinTabDone .ceinStepCircle { -fx-border-color: -cein-green; -fx-border-width: 2; }
+.ceinStepCheck { -fx-fill: transparent; -fx-stroke: -cein-green; -fx-stroke-width: 3; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; -fx-scale-x: 0.6; -fx-scale-y: 0.6; }
+.tab.tabErrorLabel .ceinStepCircle { -fx-border-color: -cein-error; }
+.tab.tabErrorLabel .ceinStepNumber { -fx-text-fill: -cein-error; }
+.ceinFlowContent .tab-pane > .tab-header-area > .headers-region > .tab { -fx-border-width: 0; }
+.ceinFlowContent .tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label { -fx-font-family: 'Inter SemiBold'; -fx-text-fill: -cein-ink; }
+.ceinFlowContent .tab-pane > .tab-header-area > .headers-region > .tab .tab-label { -fx-text-fill: -cein-muted; -fx-font-size: 14px; }
+.ceinScreenHeader { -fx-padding: 0 0 4 0; }
+.ceinScreenTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 20px; -fx-text-fill: -cein-ink; }
+.ceinScreenCaption { -fx-font-size: 14px; -fx-text-fill: -cein-muted; }
+.ceinRequiredHint { -fx-font-size: 13px; -fx-text-fill: -cein-muted; }
+.ceinRequiredStar { -fx-text-fill: -cein-error; -fx-font-size: 13px; }
+.ceinFlowBack { -fx-padding: 0 18 0 14; }
+
+/* ---------- documents (DocumentFxControl, design "Documents") ---------- */
+.ceinDocCard { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0; -fx-effect: null; }
+.ceinDocHeader { -fx-padding: 0 20 0 20; }
+.ceinDocRow { -fx-padding: 14 20 14 20; }
+.ceinDocCategory, .ceinDocRow .demoGraphicFieldLabel.ceinDocCategory { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
+.ceinDocRow .demoGraphicFieldMessageLabel.ceinDocCategory { -fx-text-fill: -cein-error; }
+.ceinDocButton { -fx-min-height: 40; -fx-pref-height: 40; -fx-padding: 0 12 0 12; -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-background-radius: 8; -fx-border-radius: 8; }
+.ceinOutline.ceinDocButton .ceinIconStroke { -fx-stroke: -cein-green; }
+.ceinDocFileIcon {
+	-fx-min-width: 34; -fx-min-height: 44; -fx-max-width: 34; -fx-max-height: 44;
+	-fx-border-color: -cein-border; -fx-border-radius: 4; -fx-background-radius: 4;
+	-fx-background-color: -cein-bg;
+}
+.ceinDocInfo { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 13px; -fx-text-fill: -cein-ink; }
+.ceinDocSource { -fx-font-size: 13px; -fx-text-fill: -cein-muted; }
+
+/* ---------- home (design "Accueil") ---------- */
+.ceinHomeSection { -fx-font-size: 13px; }
+.ceinHomeListTitle.ceinOverline { -fx-font-size: 13px; }
+.ceinHomeRow { -fx-padding: 11 20 11 20; }
+.ceinHomeIcon { -fx-stroke: -cein-green; }
+.ceinHomeChevron { -fx-stroke: -cein-muted; -fx-stroke-width: 2; }
+.ceinHomeCount { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 22px; -fx-text-fill: -cein-ink; }
+.ceinProcessIcon { -fx-stroke: -cein-green; -fx-scale-x: 1.15; -fx-scale-y: 1.15; }
+.ceinProcessTileCaption { -fx-font-size: 14px; -fx-text-fill: -cein-muted; }
+.ceinProcessTilePrimary { -fx-background-color: -cein-green; -fx-border-color: -cein-green; }
+.ceinProcessTilePrimary:hover { -fx-background-color: -cein-green-hover; -fx-border-color: -cein-green-hover; }
+.ceinProcessTilePrimary .ceinProcessTileTitle, .ceinProcessTilePrimary .operationalTitle { -fx-text-fill: white; }
+.ceinProcessTilePrimary .ceinProcessTileCaption { -fx-text-fill: rgba(255,255,255,0.86); }
+.ceinProcessTilePrimary .ceinProcessIcon { -fx-stroke: white; }
+
+/* ---------- start-up (design "Demarrage") and login footer (design "Main") ---------- */
+.ceinStepPending { -fx-text-fill: -cein-muted; }
+.ceinChip {
+	-fx-background-color: -cein-line-soft;
+	-fx-background-radius: 999;
+	-fx-padding: 4 10 4 10;
+	-fx-font-family: 'Inter Medium';
+	-fx-font-size: 13px;
+	-fx-text-fill: -cein-ink-2;
+}
+.ceinChipGreen { -fx-background-color: -cein-green-light; -fx-text-fill: -cein-green-dark; }
+.tab .ceinTabCurrent .ceinStepNumber, .tab:selected .ceinTabCurrent .ceinStepNumber { -fx-text-fill: white; }
+.ceinRequiredStar, .label .ceinRequiredStar, .ceinRequiredStar .text { -fx-text-fill: -cein-error; -fx-fill: -cein-error; }

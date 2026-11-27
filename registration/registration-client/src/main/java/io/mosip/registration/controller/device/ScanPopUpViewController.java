@@ -225,6 +225,11 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		initCeinDesign(browseEnabled);
 	}
 
+	/** CEIN: opens the file chooser as soon as the window is shown ("Importer" in the document row). */
+	public void browseNow() {
+		Platform.runLater(this::browseFile);
+	}
+
 	/** CEIN: wires the controls of the "Scan" design to the MOSIP behaviour of this window. */
 	private void initCeinDesign(boolean browseEnabled) {
 		ResourceBundle labels = applicationContext.getApplicationLanguageLabelBundle();
@@ -367,8 +372,19 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 			popupStage.initModality(Modality.WINDOW_MODAL);
 			popupStage.initOwner(fXComponents.getStage());
 			popupStage.setTitle(title);
-			popupStage.setMinHeight(docScanDevice.getHeight());
-			popupStage.setMinWidth(docScanDevice.getWidth());
+			if (docScanDevice != null) {
+				popupStage.setMinHeight(docScanDevice.getHeight());
+				popupStage.setMinWidth(docScanDevice.getWidth());
+			} else {
+				// CEIN: no scanner (view / import only)
+				popupStage.setMinHeight(560);
+				popupStage.setMinWidth(900);
+				captureBtn.setDisable(true);
+				streamBtn.setDisable(true);
+				if (ceinSource != null) {
+					ceinSource.setDisable(true);
+				}
+			}
 			popupStage.show();
 
 			LOGGER.debug("scan screen launched");
@@ -600,7 +616,9 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 			if(streamer_thread != null)
 				streamer_thread.interrupt();
 		} finally {
-			docScannerFacade.stopDevice(this.docScanDevice);
+			if (this.docScanDevice != null) {
+				docScannerFacade.stopDevice(this.docScanDevice);
+			}
 		}
 	}
 
@@ -959,8 +977,8 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		previewBtn.setDisable(false);
 		cropButton.setDisable(false);
 		cancelBtn.setDisable(false);
-		streamBtn.setDisable(false);
-		captureBtn.setDisable(false);
+		streamBtn.setDisable(docScanDevice == null);
+		captureBtn.setDisable(docScanDevice == null);
 
 		showPreview(true);
 	}

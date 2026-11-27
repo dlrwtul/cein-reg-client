@@ -6,16 +6,18 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.SVGPath?>
 
-<!-- CEIN: registration flow layout. GenericController adds the process title to
-     navigationAnchorPane and the screens (TabPane = steps) to anchorPane. -->
+<!-- CEIN: registration flow layout (designs "Enregistrement", "Documents", "Biometrie"...). The
+     process name is shown as the page title of the top bar; GenericController adds the screens
+     (TabPane = steps) to anchorPane. Footer: Previous, messages, required-field hint, Next. -->
 <GridPane fx:id="genericScreen" styleClass="parentPane, ceinFlow" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="io.mosip.registration.controller.GenericController">
    <columnConstraints>
       <ColumnConstraints hgrow="ALWAYS" />
    </columnConstraints>
    <rowConstraints>
-      <RowConstraints minHeight="56.0" />
+      <RowConstraints />
       <RowConstraints vgrow="ALWAYS" />
       <RowConstraints minHeight="72.0" />
    </rowConstraints>
@@ -26,16 +28,36 @@
 
       <GridPane fx:id="footerGridPane" hgap="12.0" styleClass="ceinFlowFooter" GridPane.rowIndex="2">
          <columnConstraints>
+            <ColumnConstraints />
             <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints />
             <ColumnConstraints halignment="RIGHT" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints vgrow="ALWAYS" />
          </rowConstraints>
          <children>
-            <Label fx:id="notification" maxWidth="Infinity" styleClass="registrationErrorMsg, ceinError" wrapText="true" />
-            <Button fx:id="next" mnemonicParsing="false" styleClass="contiuneButton" text="%continue" GridPane.columnIndex="1" />
-            <Button fx:id="authenticate" mnemonicParsing="false" styleClass="contiuneButton" text="%authenticate" GridPane.columnIndex="1" />
+            <Button fx:id="ceinBack" graphicTextGap="8.0" managed="${ceinBack.visible}" mnemonicParsing="false" styleClass="ceinSecondary, ceinFlowBack" text="%ceinPrevious">
+               <graphic>
+                  <SVGPath content="M15 6l-6 6 6 6" styleClass="ceinIconStroke" />
+               </graphic>
+            </Button>
+            <Label fx:id="notification" maxWidth="Infinity" styleClass="registrationErrorMsg, ceinError" wrapText="true" GridPane.columnIndex="1" />
+            <Label graphicTextGap="4.0" styleClass="ceinRequiredHint" text="%ceinRequiredHint" GridPane.columnIndex="2">
+               <graphic>
+                  <Label styleClass="ceinRequiredStar" text="*" />
+               </graphic>
+            </Label>
+            <Button fx:id="next" contentDisplay="RIGHT" graphicTextGap="8.0" mnemonicParsing="false" styleClass="contiuneButton" text="%ceinNext" GridPane.columnIndex="3">
+               <graphic>
+                  <SVGPath content="M9 6l6 6-6 6" styleClass="ceinIconStroke, ceinIconOnPrimary" />
+               </graphic>
+            </Button>
+            <Button fx:id="authenticate" contentDisplay="RIGHT" graphicTextGap="8.0" mnemonicParsing="false" styleClass="contiuneButton" text="%continue" GridPane.columnIndex="3">
+               <graphic>
+                  <SVGPath content="M9 6l6 6-6 6" styleClass="ceinIconStroke, ceinIconOnPrimary" />
+               </graphic>
+            </Button>
          </children>
       </GridPane>
    </children>

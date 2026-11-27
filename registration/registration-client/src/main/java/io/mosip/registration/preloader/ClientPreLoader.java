@@ -38,7 +38,6 @@ public class ClientPreLoader extends Preloader {
 
     // CEIN: readable start-up steps (the raw technical log stays available below)
     private final VBox steps = new VBox(8);
-    private Label currentStep;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -48,7 +47,9 @@ public class ClientPreLoader extends Preloader {
         // ---- header: flag + title + version
         Label title = new Label("Démarrage du client d'enregistrement");
         title.getStyleClass().add("ceinPreloaderTitle");
-        Label version = new Label("CEIN · MOSIP 1.2.0.2");
+        String implementationVersion = ClientPreLoader.class.getPackage() == null ? null
+                : ClientPreLoader.class.getPackage().getImplementationVersion();
+        Label version = new Label("CEIN · version " + (implementationVersion == null ? "1.2.0.2" : implementationVersion));
         version.getStyleClass().add("ceinMuted");
         VBox titles = new VBox(2, title, version);
         HBox header = new HBox(14, flag(), titles);
@@ -65,7 +66,7 @@ public class ClientPreLoader extends Preloader {
         textArea.setWrapText(true);
         textArea.setPrefHeight(140);
         textArea.getStyleClass().add("ceinPreloaderLog");
-        TitledPane log = new TitledPane("Journal technique", textArea);
+        TitledPane log = new TitledPane("Afficher le journal technique", textArea);
         log.setExpanded(false);
         log.setAnimated(false);
         log.getStyleClass().add("ceinPreloaderLogPane");
@@ -97,7 +98,27 @@ public class ClientPreLoader extends Preloader {
             }
         });
 
-        VBox card = new VBox(18, header, label, progressBar, steps, log, buttons);
+        // ---- status line: current step and "Étape n sur 7" (design "Demarrage")
+        Region statusSpacer = new Region();
+        HBox.setHgrow(statusSpacer, Priority.ALWAYS);
+        stepCounter.getStyleClass().add("ceinMuted");
+        HBox status = new HBox(12, label, statusSpacer, stepCounter);
+        status.setAlignment(Pos.CENTER_LEFT);
+        VBox progress = new VBox(8, status, progressBar);
+        for (String name : STAGES) {
+            Label stage = new Label(name);
+            stage.getStyleClass().addAll("ceinStep", "ceinStepPending");
+            Label dot = new Label("\u00B7");
+            dot.setMinWidth(16);
+            dot.setAlignment(Pos.CENTER);
+            stage.setGraphic(dot);
+            stage.setGraphicTextGap(10);
+            stageLabels.add(stage);
+            steps.getChildren().add(stage);
+        }
+        stepCounter.setText("");
+
+        VBox card = new VBox(20, header, progress, steps, log, buttons);
         card.getStyleClass().addAll("ceinCard", "ceinPreloaderCard");
         card.setMaxWidth(640);
         card.setMaxHeight(Region.USE_PREF_SIZE);
@@ -159,59 +180,94 @@ public class ClientPreLoader extends Preloader {
         return star;
     }
 
-    /** Adds a readable step for a known technical message; returns false when the message is unknown. */
+    /** The 7 start-up stages shown to the operator (design "Demarrage"). */
+    private static final String[] STAGES = {
+            "Vérification de l'intégrité du client",
+            "Base de données locale",
+            "Langues et préférences locales",
+            "Connexion au serveur",
+            "Périphériques biométriques",
+            "Synchronisation des paramètres",
+            "Démarrage des tâches planifiées" };
+    private final java.util.List<Label> stageLabels = new java.util.ArrayList<>();
+    private final Label stepCounter = new Label();
+    private int currentStage = -1;
+
+    /** Moves the stage list forward for a known technical message (unknown messages only go to the log). */
     private void addStep(String message) {
-        String text = translate(message);
-        if (text == null) {
+        int stage = stageOf(message);
+        if (stage < 0) {
             return;
         }
-        markCurrentStepDone();
-        currentStep = new Label(text);
-        currentStep.getStyleClass().addAll("ceinStep", "ceinStepCurrent");
+        String detail = detailOf(message);
+        if (detail != null) {
+            stageLabels.get(stage).setText(STAGES[stage] + " : " + detail);
+        }
+        if (stage < currentStage) {
+            return;
+        }
+        for (int i = 0; i < stage; i++) {
+            setStageDone(i);
+        }
+        currentStage = stage;
+        Label current = stageLabels.get(stage);
+        current.getStyleClass().removeAll("ceinStepPending", "ceinStepDone");
+        if (!current.getStyleClass().contains("ceinStepCurrent")) {
+            current.getStyleClass().add("ceinStepCurrent");
+        }
         javafx.scene.control.ProgressIndicator spinner = new javafx.scene.control.ProgressIndicator();
         spinner.setPrefSize(16, 16);
         spinner.setMaxSize(16, 16);
-        currentStep.setGraphic(spinner);
-        currentStep.setGraphicTextGap(10);
-        steps.getChildren().add(currentStep);
-        // keep the card compact: only the most recent steps are listed (full log below)
-        while (steps.getChildren().size() > 7) {
-            steps.getChildren().remove(0);
-        }
-        label.setText(text + "…");
+        current.setGraphic(spinner);
+        label.setText(STAGES[stage] + "…");
+        stepCounter.setText("Étape " + (stage + 1) + " sur " + STAGES.length);
+        progressBar.setProgress((double) stage / STAGES.length);
     }
 
-    private void markCurrentStepDone() {
-        if (currentStep == null) {
+    private void setStageDone(int index) {
+        Label stage = stageLabels.get(index);
+        if (stage.getStyleClass().contains("ceinStepDone")) {
             return;
         }
-        currentStep.getStyleClass().remove("ceinStepCurrent");
-        currentStep.getStyleClass().add("ceinStepDone");
+        stage.getStyleClass().removeAll("ceinStepPending", "ceinStepCurrent");
+        stage.getStyleClass().add("ceinStepDone");
         javafx.scene.shape.SVGPath check = new javafx.scene.shape.SVGPath();
         check.setContent("M2 8 L6 12 L14 3");
         check.setStyle("-fx-fill: transparent; -fx-stroke: #006B33; -fx-stroke-width: 2.4; -fx-stroke-line-cap: round; -fx-stroke-line-join: round;");
         StackPane box = new StackPane(check);
         box.setPrefSize(16, 16);
         box.setMinSize(16, 16);
-        currentStep.setGraphic(box);
+        stage.setGraphic(box);
     }
 
-    private static String translate(String message) {
-        if (message == null) return null;
+    private void markCurrentStepDone() {
+        for (int i = 0; i < stageLabels.size(); i++) {
+            setStageDone(i);
+        }
+        stepCounter.setText("");
+    }
+
+    private static int stageOf(String message) {
+        if (message == null) return -1;
         String m = message.trim();
-        if (m.startsWith("Started to validate the build setup")) return "Vérification des fichiers du client";
-        if (m.startsWith("Client integrity check successful")) return "Intégrité du client vérifiée";
-        if (m.startsWith("Creating application context")) return "Préparation de l'application";
-        if (m.startsWith("Checking for any DB upgrades")) return "Vérification de la base de données locale";
-        if (m.startsWith("Language setup complete")) return "Langues configurées";
-        if (m.startsWith("Properties with local preferences")) return "Préférences locales chargées";
-        if (m.startsWith("Checking server connectivity")) return "Connexion au serveur";
-        if (m.startsWith("Machine is ONLINE")) return "Serveur joignable";
-        if (m.startsWith("Machine is OFFLINE")) return "Serveur injoignable : fonctionnement hors ligne";
-        if (m.startsWith("Client settings startup sync started")) return "Synchronisation des paramètres";
-        if (m.startsWith("Warning : ** NO VALID AUTH-TOKEN")) return "Synchronisation reportée à la connexion";
-        if (m.startsWith("Biometric device scanning started")) return "Recherche des périphériques biométriques";
-        if (m.startsWith("Job scheduler started")) return "Tâches planifiées démarrées";
+        if (m.startsWith("Started to validate the build setup") || m.startsWith("Client integrity check successful")) return 0;
+        if (m.startsWith("Creating application context") || m.startsWith("Checking for any DB upgrades")
+                || m.startsWith("Nothing to be upgraded")) return 1;
+        if (m.startsWith("Language setup complete") || m.startsWith("Properties with local preferences")) return 2;
+        if (m.startsWith("Checking server connectivity") || m.startsWith("Machine is ONLINE") || m.startsWith("Machine is OFFLINE")) return 3;
+        if (m.startsWith("Biometric device scanning started")) return 4;
+        if (m.startsWith("Client settings startup sync started") || m.startsWith("Warning : ** NO VALID AUTH-TOKEN")) return 5;
+        if (m.startsWith("Job scheduler started")) return 6;
+        return -1;
+    }
+
+    private static String detailOf(String message) {
+        String m = message.trim();
+        if (m.startsWith("Machine is ONLINE")) return "en ligne";
+        if (m.startsWith("Machine is OFFLINE")) return "hors ligne";
+        if (m.startsWith("Nothing to be upgraded")) return "aucune mise à niveau";
+        if (m.startsWith("Warning : ** NO VALID AUTH-TOKEN")) return "reportée à la connexion";
+        if (m.startsWith("Biometric device scanning started")) return "ports 4501 à 4600";
         return null;
     }
 

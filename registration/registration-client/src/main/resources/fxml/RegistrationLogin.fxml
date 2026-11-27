@@ -97,7 +97,7 @@
                             <TextField fx:id="userId" maxWidth="Infinity" onAction="#validateUserId" promptText="%withusername" styleClass="loginTextStyle" />
                           </children>
                         </VBox>
-                        <Button fx:id="sub1" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateUserId" styleClass="loginSubmitStyle" text="%submit" />
+                        <Button fx:id="sub1" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateUserId" styleClass="loginSubmitStyle" text="%ceinLoginContinue" />
                         <ProgressIndicator fx:id="progressIndicator" managed="${progressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
                         <Hyperlink fx:id="forgotUsrnme" managed="${forgotUsrnme.visible}" mnemonicParsing="false" onAction="#forgotUsrname" styleClass="hyperLinkStyle" text="%forgotUsername" visible="false" />
                       </children>
@@ -128,7 +128,7 @@
                             <PasswordField fx:id="password" maxWidth="Infinity" onAction="#validateCredentials" promptText="%withpword" styleClass="loginTextStyle" />
                           </children>
                         </VBox>
-                        <Button fx:id="sub2" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateCredentials" styleClass="loginSubmitStyle" text="%submit" />
+                        <Button fx:id="sub2" maxWidth="Infinity" mnemonicParsing="false" onAction="#validateCredentials" styleClass="loginSubmitStyle" text="%ceinSignIn" />
                         <ProgressIndicator fx:id="passwordProgressIndicator" managed="${passwordProgressIndicator.visible}" maxHeight="32.0" maxWidth="32.0" progress="0.0" visible="false" />
                         <HBox alignment="CENTER_LEFT" spacing="16.0">
                           <children>
@@ -263,10 +263,12 @@
         </AnchorPane>
       </children>
     </StackPane>
-    <HBox alignment="CENTER_RIGHT" spacing="6.0" styleClass="ceinLoginFooter">
+    <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="ceinLoginFooter">
       <children>
-        <Label styleClass="ceinMuted" text="%ceinClientVersion" />
-        <Label styleClass="ceinMuted" text=":" />
+        <Label fx:id="ceinStationChip" managed="${ceinStationChip.visible}" styleClass="ceinChip, ceinChipGreen" visible="false" />
+        <Label fx:id="ceinCenterChip" managed="${ceinCenterChip.visible}" styleClass="ceinChip" visible="false" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label styleClass="ceinMuted" text="%ceinVersionPrefix" />
         <Label fx:id="versionValueLabel" styleClass="ceinMuted" />
       </children>
     </HBox>

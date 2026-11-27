@@ -64,6 +64,15 @@ final class PreviewDemo {
 				((Node) find(root, "backButton")).setVisible(false);
 				return root;
 			}
+			case "RegistrationLogin": {
+				Label st = find(root, "ceinStationChip"); st.setText(MessageFormat.format(b.getString("ceinStationChip"), "DK-PLT-014")); st.setVisible(true);
+				Label ce = find(root, "ceinCenterChip"); ce.setText("Centre Dakar Plateau"); ce.setVisible(true);
+				((Label) find(root, "versionValueLabel")).setText("1.2.0.2-cein");
+				return root;
+			}
+			case "RegistrationOfficerLayout":
+				home(root, b);
+				return root;
 			case "AckReceipt":
 				((Label) find(root, "ceinAckRid")).setText("10001100010002 20261127104230");
 				((Label) find(root, "ceinAckApplicant")).setText("Aminata DIALLO");
@@ -192,5 +201,56 @@ final class PreviewDemo {
 		Rectangle doc = new Rectangle(300, 410, Color.WHITE);
 		((javafx.scene.Group) find(root, "imageGroup")).getChildren().setAll(doc);
 		((javafx.scene.text.Text) find(root, "scanningMsg")).setText("Fichier chargé : extrait-naissance.pdf (2 pages)");
+	}
+
+	private static void setText(Parent root, String id, String text) {
+		Node n = root.lookup("#" + id);
+		if (n instanceof Label) ((Label) n).setText(text);
+	}
+
+	private static void home(Parent root, ResourceBundle b) {
+		Node content = root.lookup("#homeContent");
+		if (content != null) content.setVisible(true);
+		setText(root, "ceinPageTitle", b.getString("ceinHomeTitle"));
+		setText(root, "ceinLastSync", MessageFormat.format(b.getString("ceinLastSyncShort"), "08:12"));
+		setText(root, "registrationOfficerName", "Awa Ndiaye");
+		setText(root, "ceinUserInitials", "AN");
+		root.applyCss();
+		setText(root, "ceinGreeting", MessageFormat.format(b.getString("ceinGreeting"), "Awa"));
+		setText(root, "lastSyncTime", "aujourd'hui 08:12");
+		setText(root, "versionValueLabel", "1.2.0.2-cein");
+		setText(root, "ceinUploadCount", "12");
+		setText(root, "ceinApprovalCount", "3");
+		setText(root, "ceinReRegCount", "1");
+		GridPane tiles = (GridPane) root.lookup("#registrationGridPane");
+		if (tiles == null) return;
+		String[][] data = { { "Nouvel enregistrement", "NEW" }, { "Mise à jour UIN", "UPDATE" }, { "Carte perdue", "LOST" }, { "Correction biométrique", "CORRECTION" } };
+		for (int i = 0; i < 4; i++) {
+			ColumnConstraints c = new ColumnConstraints();
+			c.setPercentWidth(25);
+			tiles.getColumnConstraints().add(c);
+		}
+		String[] icons = { "M13 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7M19 8v6M16 11h6",
+				"M3 5h18v14H3z M11 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0 M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h3M15 13h3",
+				"M18 11a7 7 0 1 1-14 0 7 7 0 0 1 14 0 M21 21l-4.3-4.3",
+				"M12 11v2.5c0 3-1 5.5-2.5 7.5M8 5.6A7 7 0 0 1 19 11v2M5 9a7 7 0 0 0-.4 2.3v2M15.5 13c0 3-.6 5.5-1.8 7.6M8.6 11a3.5 3.5 0 0 1 6.9 0" };
+		for (int i = 0; i < data.length; i++) {
+			GridPane tile = new GridPane();
+			tile.getStyleClass().addAll("operationalPaneDetailsSync", "ceinProcessTile");
+			if (i == 0) tile.getStyleClass().add("ceinProcessTilePrimary");
+			tile.setMaxWidth(Double.MAX_VALUE);
+			javafx.scene.shape.SVGPath icon = new javafx.scene.shape.SVGPath();
+			icon.setContent(icons[i]);
+			icon.getStyleClass().addAll("ceinIconStroke", "ceinProcessIcon");
+			Label t = new Label(data[i][0]);
+			t.getStyleClass().addAll("operationalTitle", "ceinProcessTileTitle");
+			Label c = new Label(b.getString("ceinProcessHint_" + data[i][1]));
+			c.getStyleClass().add("ceinProcessTileCaption");
+			VBox v = new VBox(14, new javafx.scene.layout.StackPane(icon), new VBox(4, t, c));
+			((javafx.scene.layout.StackPane) v.getChildren().get(0)).setAlignment(Pos.TOP_LEFT);
+			tile.add(v, 0, 0);
+			GridPane.setHgrow(v, Priority.ALWAYS);
+			tiles.add(tile, i, 0);
+		}
 	}
 }

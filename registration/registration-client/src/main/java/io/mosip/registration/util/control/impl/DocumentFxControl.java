@@ -80,47 +80,176 @@ public class DocumentFxControl extends FxControl {
 		this.uiFieldDTO = uiFieldDTO;
 		this.control = this;
 
-		HBox hBox = new HBox();
-		hBox.setSpacing(20);
+		// CEIN (design "Documents"): category | document type | reference number | file actions
+		GridPane row = new GridPane();
+		row.setHgap(16);
+		row.getStyleClass().addAll("ceinCard", "ceinDocRow");
+		row.setMaxWidth(Double.MAX_VALUE);
+		javafx.scene.layout.ColumnConstraints c1 = new javafx.scene.layout.ColumnConstraints();
+		c1.setPercentWidth(22);
+		javafx.scene.layout.ColumnConstraints c2 = new javafx.scene.layout.ColumnConstraints();
+		c2.setPercentWidth(27);
+		javafx.scene.layout.ColumnConstraints c3 = new javafx.scene.layout.ColumnConstraints();
+		c3.setPercentWidth(20);
+		javafx.scene.layout.ColumnConstraints c4 = new javafx.scene.layout.ColumnConstraints();
+		c4.setPercentWidth(31);
+		c4.setHalignment(javafx.geometry.HPos.RIGHT);
+		row.getColumnConstraints().addAll(c1, c2, c3, c4);
+		RowConstraints rc = new RowConstraints();
+		rc.setValignment(javafx.geometry.VPos.CENTER);
+		row.getRowConstraints().add(rc);
 
-		// DROP-DOWN
-		hBox.getChildren().add(create(uiFieldDTO));
+		// DROP-DOWN (its title label becomes the category column)
+		VBox typeBox = create(uiFieldDTO);
+		Node categoryTitle = typeBox.getChildren().remove(0);
+		categoryTitle.setVisible(true);
+		categoryTitle.getStyleClass().add("ceinDocCategory");
+		if (categoryTitle instanceof Label) {
+			((Label) categoryTitle).setWrapText(true);
+		}
+		row.add(categoryTitle, 0, 0);
+		row.add(typeBox, 1, 0);
 
-		// REF-FIELD
-		hBox.getChildren().add(createDocRef(uiFieldDTO.getId()));
+		// REF-FIELD (the floating label is not used: the column header names it)
+		VBox refBox = createDocRef(uiFieldDTO.getId());
+		Node refLabel = refBox.getChildren().get(0);
+		refLabel.setManaged(false);
+		refLabel.setOpacity(0);
+		row.add(refBox, 2, 0);
 
-		// CLEAR IMAGE
-		GridPane tickMarkGridPane = getImageGridPane(PREVIEW_ICON, RegistrationConstants.DOC_PREVIEW_ICON);
-		tickMarkGridPane.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+		// FILE: captured document (icon, info, view, delete) or scan / import buttons
+		VBox captured = getImageGridPane(PREVIEW_ICON, null);
+		Button viewButton = ceinButton(uiFieldDTO.getId() + "CeinView", "ceinDocView", "ceinSecondary",
+				"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0");
+		viewButton.setOnAction(event -> scanDocument(true));
+		HBox capturedRow = new HBox(12, ceinFileIcon(), ceinFileInfo(), viewButton);
+		capturedRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+		captured.getChildren().setAll(capturedRow);
 
-			scanDocument(true);
-
-		});
-		// TICK-MARK
-		hBox.getChildren().add(tickMarkGridPane);
-
-		// CLEAR IMAGE
-		GridPane clearGridPane = getImageGridPane(CLEAR_ID, RegistrationConstants.CLOSE_IMAGE_PATH);
-		clearGridPane.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-			ComboBox<DocumentCategoryDto> comboBox = (ComboBox<DocumentCategoryDto>) getField(
-					uiFieldDTO.getId());
+		VBox clear = getImageGridPane(CLEAR_ID, null);
+		Button deleteButton = ceinButton(uiFieldDTO.getId() + "CeinDelete", null, "ceinDanger",
+				"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3");
+		deleteButton.setOnAction(event -> {
+			ComboBox<DocumentCategoryDto> comboBox = (ComboBox<DocumentCategoryDto>) getField(uiFieldDTO.getId());
 			comboBox.getSelectionModel().clearSelection();
 			clearCapturedDocuments();
 		});
-		hBox.getChildren().add(clearGridPane);
+		clear.getChildren().setAll(deleteButton);
 
-		// SCAN-BUTTON
-		hBox.getChildren().add(createScanButton(uiFieldDTO));
+		HBox empty = new HBox(8);
+		empty.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+		empty.getChildren().add(createScanButton(uiFieldDTO));
+		if (io.mosip.registration.cein.CeinSettings.isDocBrowseEnabled()) {
+			Button importButton = ceinButton(uiFieldDTO.getId() + "CeinImport", "ceinDocImport", "ceinSecondary",
+					"M12 16V4M7 9l5-5 5 5M4 16v4h16v-4");
+			importButton.setOnAction(event -> importDocument());
+			empty.getChildren().add(importButton);
+		}
+		empty.visibleProperty().bind(captured.visibleProperty().not());
+		empty.managedProperty().bind(empty.visibleProperty());
 
-		this.node = hBox;
+		HBox file = new HBox(8, captured, clear, empty);
+		file.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+		HBox.setHgrow(captured, javafx.scene.layout.Priority.ALWAYS);
+		row.add(file, 3, 0);
+
+		this.node = row;
 
 		setListener(getField(uiFieldDTO.getId() + RegistrationConstants.BUTTON));
 
-		changeNodeOrientation(hBox, getRegistrationDTo().getSelectedLanguagesByApplicant().get(0));
+		changeNodeOrientation(row, getRegistrationDTo().getSelectedLanguagesByApplicant().get(0));
 
 		fillData(getDocumentCategories());
 
 		return this.control;
+	}
+
+	/** CEIN: label of a button of the document row. */
+	private String ceinLabel(String key) {
+		ResourceBundle rb = ApplicationContext.getInstance()
+				.getBundle(getRegistrationDTo().getSelectedLanguagesByApplicant().get(0), RegistrationConstants.LABELS);
+		return rb.containsKey(key) ? rb.getString(key) : key;
+	}
+
+	private Button ceinButton(String id, String labelKey, String styleClass, String svg) {
+		Button button = new Button(labelKey == null ? null : ceinLabel(labelKey));
+		button.setId(id);
+		button.setMnemonicParsing(false);
+		button.getStyleClass().addAll(styleClass, "ceinDocButton");
+		javafx.scene.shape.SVGPath icon = new javafx.scene.shape.SVGPath();
+		icon.setContent(svg);
+		icon.getStyleClass().add("ceinIconStroke");
+		if ("ceinDanger".equals(styleClass)) {
+			icon.getStyleClass().add("ceinIconDanger");
+		}
+		button.setGraphic(icon);
+		button.setGraphicTextGap(8);
+		button.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+		return button;
+	}
+
+	private Node ceinFileIcon() {
+		javafx.scene.shape.SVGPath icon = new javafx.scene.shape.SVGPath();
+		icon.setContent("M14 3H6v18h12V7z M14 3v4h4");
+		icon.getStyleClass().add("ceinIconStroke");
+		javafx.scene.layout.StackPane box = new javafx.scene.layout.StackPane(icon);
+		box.getStyleClass().add("ceinDocFileIcon");
+		return box;
+	}
+
+	private Label ceinInfoLabel;
+	private Label ceinSourceLabel;
+
+	private Node ceinFileInfo() {
+		ceinInfoLabel = new Label();
+		ceinInfoLabel.getStyleClass().add("ceinDocInfo");
+		ceinSourceLabel = new Label();
+		ceinSourceLabel.getStyleClass().add("ceinDocSource");
+		VBox info = new VBox(2, ceinInfoLabel, ceinSourceLabel);
+		HBox.setHgrow(info, javafx.scene.layout.Priority.ALWAYS);
+		info.setMinWidth(0);
+		updateCeinInfo(null);
+		return info;
+	}
+
+	/** CEIN: "2 pages · PDF" (page count known when the document was captured in this session). */
+	private void updateCeinInfo(Integer pages) {
+		if (ceinInfoLabel == null) {
+			return;
+		}
+		DocumentDto documentDto = getRegistrationDTo().getDocuments().get(uiFieldDTO.getId());
+		String format = documentDto != null && documentDto.getFormat() != null ? documentDto.getFormat().toUpperCase() : "";
+		String info = pages == null ? ceinLabel("ceinDocAttached")
+				: java.text.MessageFormat.format(ceinLabel("ceinDocPages"), pages);
+		ceinInfoLabel.setText(format.isEmpty() ? info : info + " \u00B7 " + format);
+		ceinSourceLabel.setText(documentDto != null && documentDto.getRefNumber() != null && !documentDto.getRefNumber().isBlank()
+				? documentDto.getRefNumber() : "");
+	}
+
+	/** CEIN: title of the scan window, "category - document type". */
+	public String getScanTitle() {
+		String category = String.join(RegistrationConstants.SLASH, uiFieldDTO.getLabel().values());
+		List<String> labels = new ArrayList<>();
+		getRegistrationDTo().getSelectedLanguagesByApplicant().forEach(lang -> {
+			if (uiFieldDTO.getLabel().get(lang) != null) labels.add(uiFieldDTO.getLabel().get(lang));
+		});
+		if (!labels.isEmpty()) {
+			category = labels.get(0);
+		}
+		ComboBox<DocumentCategoryDto> comboBox = (ComboBox<DocumentCategoryDto>) getField(uiFieldDTO.getId());
+		if (comboBox != null && comboBox.getValue() != null && comboBox.getValue().getName() != null) {
+			return category + " \u2014 " + comboBox.getValue().getName();
+		}
+		return category;
+	}
+
+	private void importDocument() {
+		if (!isValid()) {
+			documentScanController.generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.PLEASE_SELECT)
+					+ RegistrationConstants.SPACE + uiFieldDTO.getSubType() + " " + RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.DOCUMENT));
+			return;
+		}
+		documentScanController.importDocument(uiFieldDTO.getId(), this);
 	}
 
 	private void clearCapturedDocuments() {
@@ -147,49 +276,27 @@ public class DocumentFxControl extends FxControl {
 		getField(uiFieldDTO.getId() + CLEAR_ID).setManaged(true);
 	}
 
-	private GridPane getImageGridPane(String id, String imagePath) {
-		VBox imageVBox = new VBox();
-		imageVBox.setId(uiFieldDTO.getId() + id);
-		ImageView imageView = new ImageView(
-				(new Image(this.getClass().getResourceAsStream(imagePath), 25, 25, true, true)));
-
-		boolean isVisible = getData() != null ? true : false;
-		imageView.setPreserveRatio(true);
-		imageVBox.setVisible(isVisible);
-
-		imageVBox.getChildren().add(imageView);
-
-		GridPane gridPane = new GridPane();
-		RowConstraints rowConstraint1 = new RowConstraints();
-		RowConstraints rowConstraint2 = new RowConstraints();
-		rowConstraint1.setPercentHeight(45);
-		rowConstraint2.setPercentHeight(55);
-		gridPane.getRowConstraints().addAll(rowConstraint1, rowConstraint2);
-		gridPane.add(imageVBox, 0, 1);
-
-		return gridPane;
+	private VBox getImageGridPane(String id, String imagePath) {
+		VBox box = new VBox();
+		box.setId(uiFieldDTO.getId() + id);
+		box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+		box.setVisible(getData() != null);
+		box.setManaged(box.isVisible());
+		// the MOSIP code toggles visible and sets managed=true: an invisible part takes no space
+		box.visibleProperty().addListener((o, oldValue, visible) -> box.setManaged(visible));
+		box.managedProperty().addListener((o, oldValue, managed) -> {
+			if (managed && !box.isVisible()) {
+				box.setManaged(false);
+			}
+		});
+		return box;
 	}
 
-	private GridPane createScanButton(UiFieldDTO uiFieldDTO) {
-
-		Button scanButton = new Button();
-		scanButton.setText(ApplicationContext.getBundle(null, RegistrationConstants.LABELS)
-				.getString(RegistrationConstants.SCAN_BUTTON));
-		scanButton.setId(uiFieldDTO.getId() + RegistrationConstants.BUTTON);
+	private Button createScanButton(UiFieldDTO uiFieldDTO) {
+		Button scanButton = ceinButton(uiFieldDTO.getId() + RegistrationConstants.BUTTON, "ceinScanCapture", "ceinOutline",
+				"M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16");
 		scanButton.getStyleClass().add(RegistrationConstants.DOCUMENT_CONTENT_BUTTON);
-		scanButton.setGraphic(new ImageView(
-				new Image(this.getClass().getResourceAsStream(RegistrationConstants.SCAN), 12, 12, true, true)));
-
-		GridPane scanButtonGridPane = new GridPane();
-		RowConstraints rowConstraint1 = new RowConstraints();
-		RowConstraints rowConstraint2 = new RowConstraints();
-		rowConstraint1.setPercentHeight(35);
-		rowConstraint2.setPercentHeight(65);
-		scanButtonGridPane.getRowConstraints().addAll(rowConstraint1, rowConstraint2);
-		scanButtonGridPane.setPrefWidth(80);
-		scanButtonGridPane.add(scanButton, 0, 1);
-
-		return scanButtonGridPane;
+		return scanButton;
 	}
 
 	private void scanDocument(boolean isPreviewOnly) {
@@ -390,6 +497,7 @@ public class DocumentFxControl extends FxControl {
 						uiFieldDTO.getId() + RegistrationConstants.DOC_TEXT_FIELD);
 				documentDto.setRefNumber(textField.getText());
 				getRegistrationDTo().addDocument(uiFieldDTO.getId(), documentDto);
+				updateCeinInfo(bufferedImages.size());
 
 				getField(uiFieldDTO.getId() + PREVIEW_ICON).setVisible(true);
 				getField(uiFieldDTO.getId() + CLEAR_ID).setVisible(true);
@@ -461,15 +569,6 @@ public class DocumentFxControl extends FxControl {
 						AuditReferenceIdTypes.USER_ID.getReferenceTypeId());
 
 				scanDocument(false);
-			}
-		});
-		scanButton.hoverProperty().addListener((ov, oldValue, newValue) -> {
-			if (newValue) {
-				scanButton.setGraphic(new ImageView(new Image(
-						this.getClass().getResourceAsStream(RegistrationConstants.SCAN_FOCUSED), 12, 12, true, true)));
-			} else {
-				scanButton.setGraphic(new ImageView(new Image(
-						this.getClass().getResourceAsStream(RegistrationConstants.SCAN), 12, 12, true, true)));
 			}
 		});
 	}
@@ -558,6 +657,7 @@ public class DocumentFxControl extends FxControl {
 				comboBox.getSelectionModel().select(selected.get());
 				TextField textField = (TextField) getField(uiFieldDTO.getId() + RegistrationConstants.DOC_TEXT_FIELD);
 				textField.setText(documentDto.getRefNumber());
+				updateCeinInfo(null);
 				getField(uiFieldDTO.getId() + PREVIEW_ICON).setVisible(true);
 				getField(uiFieldDTO.getId() + CLEAR_ID).setVisible(true);
 			}

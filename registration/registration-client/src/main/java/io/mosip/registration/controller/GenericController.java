@@ -130,6 +130,10 @@ public class GenericController extends BaseController {
 	@FXML
 	private Button authenticate;
 
+	// CEIN: "Previous" button of the flow footer
+	@FXML
+	private Button ceinBack;
+
 	@FXML
 	private Label notification;
 	
@@ -194,38 +198,60 @@ public class GenericController extends BaseController {
 
 	private HBox getPreRegistrationFetchComponent() {
 		String langCode = getRegistrationDTOFromSession().getSelectedLanguagesByApplicant().get(0);
+		java.util.ResourceBundle labels = ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS);
 
+		// CEIN (design "Enregistrement"): label + field, outline button, hint
 		HBox hBox = new HBox();
-		hBox.setAlignment(Pos.CENTER_LEFT);
-		hBox.setSpacing(20);
-		hBox.setPrefHeight(100);
-		hBox.setPrefWidth(200);
+		hBox.setAlignment(Pos.BOTTOM_LEFT);
+		hBox.setSpacing(12);
+		hBox.getStyleClass().add("ceinPreReg");
 
 		Label label = new Label();
-		label.getStyleClass().add(LABEL_CLASS);
+		label.getStyleClass().addAll(LABEL_CLASS, "ceinFieldLabel");
 		label.setId("preRegistrationLabel");
-		label.setText(ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS)
-				.getString("search_for_Pre_registration_id"));
-		hBox.getChildren().add(label);
+		label.setText(labels.containsKey("ceinPreRegLabel") ? labels.getString("ceinPreRegLabel")
+				: labels.getString("search_for_Pre_registration_id"));
 		TextField textField = new TextField();
 		textField.setId("preRegistrationId");
 		textField.getStyleClass().add(TEXTFIELD_CLASS);
-		hBox.getChildren().add(textField);
+		if (labels.containsKey("ceinPreRegPrompt")) {
+			textField.setPromptText(labels.getString("ceinPreRegPrompt"));
+		}
+		VBox fieldBox = new VBox(6, label, textField);
+		fieldBox.setPrefWidth(420);
+		fieldBox.setMinWidth(260);
+		HBox.setHgrow(fieldBox, javafx.scene.layout.Priority.SOMETIMES);
+		hBox.getChildren().add(fieldBox);
+
 		Button button = new Button();
 		button.setId("fetchBtn");
-		button.getStyleClass().add("demoGraphicPaneContentButton");
-		button.setText(ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS)
-				.getString("fetch"));
-
+		button.getStyleClass().addAll("ceinOutline", "ceinPreRegButton");
+		button.setText(labels.containsKey("ceinPreRegFetch") ? labels.getString("ceinPreRegFetch") : labels.getString("fetch"));
+		javafx.scene.shape.SVGPath icon = new javafx.scene.shape.SVGPath();
+		icon.setContent("M12 3v12M7 10l5 5 5-5M4 19h16");
+		icon.getStyleClass().add("ceinIconStroke");
+		button.setGraphic(icon);
+		button.setGraphicTextGap(8);
+		button.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
 		button.setOnAction(event -> {
 			executePreRegFetchTask(textField);
 		});
-
 		hBox.getChildren().add(button);
+
 		progressIndicator = new ProgressIndicator();
 		progressIndicator.setId("progressIndicator");
 		progressIndicator.setVisible(false);
+		progressIndicator.setMaxSize(32, 32);
 		hBox.getChildren().add(progressIndicator);
+
+		if (labels.containsKey("ceinPreRegFormHint")) {
+			Label hint = new Label(labels.getString("ceinPreRegFormHint"));
+			hint.setWrapText(true);
+			hint.getStyleClass().add("ceinMuted");
+			hint.setMinWidth(160);
+			HBox.setHgrow(hint, javafx.scene.layout.Priority.ALWAYS);
+			hBox.getChildren().add(hint);
+		}
 		return hBox;
 	}
 
@@ -484,6 +510,27 @@ public class GenericController extends BaseController {
 
 		next.setOnAction(getNextActionHandler());
 		authenticate.setOnAction(getRegistrationAuthActionHandler());
+
+		// CEIN (design): the process name is the page title of the top bar
+		navigationAnchorPane.setVisible(false);
+		navigationAnchorPane.setManaged(false);
+		final String processLabel = navigationLabel.getText();
+		javafx.application.Platform.runLater(() -> {
+			if (genericScreen.getScene() != null) {
+				io.mosip.registration.cein.CeinShell.setTitle(genericScreen.getScene().getRoot(), processLabel);
+			}
+		});
+	}
+
+	/** CEIN: previous visible step (the MOSIP tab handler allows going back without validation). */
+	private void goToPreviousStep(TabPane tabPane) {
+		int index = tabPane.getSelectionModel().getSelectedIndex() - 1;
+		while (index >= 0 && tabPane.getTabs().get(index).isDisabled()) {
+			index--;
+		}
+		if (index >= 0) {
+			tabPane.getSelectionModel().select(index);
+		}
 	}
 
 	/*private String getScreenName(Tab tab) {
@@ -708,6 +755,11 @@ public class GenericController extends BaseController {
 		tabPane.prefHeightProperty().bind(anchorPane.heightProperty());
 
 		setTabSelectionChangeEventHandler(tabPane);
+		io.mosip.registration.cein.CeinFormLayout.trackSteps(tabPane);
+		if (ceinBack != null) {
+			ceinBack.setOnAction(event -> goToPreviousStep(tabPane));
+			ceinBack.visibleProperty().bind(tabPane.getSelectionModel().selectedIndexProperty().greaterThan(0));
+		}
 		anchorPane.getChildren().add(tabPane);
 		addNavigationButtons(processSpecDto);
 		return tabPane;
@@ -748,6 +800,11 @@ public class GenericController extends BaseController {
 			int rowIndex = 0;
 			GridPane gridPane = getScreenGroupGridPane(screenGridPane.getId()+"_col_1", screenGridPane);
 
+			// CEIN (design): title and caption of the screen (UI spec label / caption)
+			String screenLang = getRegistrationDTOFromSession().getSelectedLanguagesByApplicant().get(0);
+			String screenCaption = screenDTO.getCaption() == null ? null : screenDTO.getCaption().get(screenLang);
+			gridPane.add(io.mosip.registration.cein.CeinFormLayout.screenHeader(screenTab.getText(), screenCaption), 0, rowIndex++);
+
 			if(screenDTO.isPreRegFetchRequired()) {
 				VBox preRegCard = io.mosip.registration.cein.CeinFormLayout.card(null);
 				preRegCard.getChildren().add(getPreRegistrationFetchComponent());
@@ -775,6 +832,14 @@ public class GenericController extends BaseController {
 
 				FlowPane groupFlowPane = io.mosip.registration.cein.CeinFormLayout.row(new FlowPane());
 				groupFlowPane.prefWidthProperty().bind(groupCard.widthProperty().subtract(48));
+				// CEIN (design "Documents"): column headers above the first document row of a card
+				boolean hasDocument = groupEntry.getValue().stream().anyMatch(f -> "fileupload".equalsIgnoreCase(f.getControlType()));
+				if (hasDocument && !groupCard.getProperties().containsKey("ceinDocHeader")) {
+					groupCard.getProperties().put("ceinDocHeader", true);
+					groupCard.getStyleClass().add("ceinDocCard");
+					groupCard.getChildren().add(io.mosip.registration.cein.CeinFormLayout.documentHeader(
+							ApplicationContext.getBundle(ApplicationContext.applicationLanguage(), RegistrationConstants.LABELS)));
+				}
 
 				for(UiFieldDTO fieldDTO : groupEntry.getValue()) {
 					try {

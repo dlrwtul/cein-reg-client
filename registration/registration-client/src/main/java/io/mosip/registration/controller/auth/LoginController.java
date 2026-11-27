@@ -167,6 +167,12 @@ public class LoginController extends BaseController implements Initializable {
 	@FXML
 	private Label versionValueLabel;
 
+	// CEIN login footer (design "Main"): workstation and centre
+	@FXML
+	private Label ceinStationChip;
+	@FXML
+	private Label ceinCenterChip;
+
 	@FXML
 	private ComboBox<GenericDto> appLanguage;
 
@@ -226,6 +232,7 @@ public class LoginController extends BaseController implements Initializable {
 	public void initialize(URL arg0, ResourceBundle arg1) {
 
 		versionValueLabel.setText(softwareUpdateHandler.getCurrentVersion());
+		fillCeinFooter();
 		
 		setImage(mosipLogoImageView	, RegistrationConstants.MOSIP_LOGON_FINAL_IMG);
 		setImage(fingerprintImageView	, RegistrationConstants.FINGERPRINT_SCAN_IMG);
@@ -1035,5 +1042,32 @@ public class LoginController extends BaseController implements Initializable {
 			generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.UNABLE_LOAD_LOGIN_SCREEN));
 		}
 
+	}
+
+	/** CEIN: workstation and registration centre of this machine, shown under the login card. */
+	private void fillCeinFooter() {
+		try {
+			org.springframework.context.ApplicationContext context = ClientApplication.getApplicationContext();
+			String machineName = io.mosip.registration.util.healthcheck.RegistrationSystemPropertiesChecker.getMachineId();
+			ResourceBundle labels = ApplicationContext.getInstance().getApplicationLanguageLabelBundle();
+			if (ceinStationChip != null && machineName != null && !machineName.isBlank()) {
+				ceinStationChip.setText(java.text.MessageFormat.format(labels.getString("ceinStationChip"), machineName));
+				ceinStationChip.setVisible(true);
+			}
+			io.mosip.registration.entity.MachineMaster machine = context
+					.getBean(io.mosip.registration.repositories.MachineMasterRepository.class)
+					.findByNameIgnoreCase(machineName == null ? "" : machineName.toLowerCase());
+			if (ceinCenterChip != null && machine != null && machine.getRegCenterId() != null) {
+				io.mosip.registration.dto.RegistrationCenterDetailDTO center = context
+						.getBean(io.mosip.registration.dao.RegistrationCenterDAO.class)
+						.getRegistrationCenterDetails(machine.getRegCenterId(), ApplicationContext.applicationLanguage());
+				String name = center != null && center.getRegistrationCenterName() != null ? center.getRegistrationCenterName()
+						: machine.getRegCenterId();
+				ceinCenterChip.setText(name);
+				ceinCenterChip.setVisible(true);
+			}
+		} catch (RuntimeException exception) {
+			LOGGER.error("Unable to show the workstation / centre on the login screen", exception);
+		}
 	}
 }
