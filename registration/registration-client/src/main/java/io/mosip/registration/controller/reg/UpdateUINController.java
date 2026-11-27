@@ -236,7 +236,7 @@ public class UpdateUINController extends BaseController implements Initializable
 						getClass().getResource(RegistrationConstants.CREATE_PACKET_PAGE),
 						applicationContext.getBundle(getRegistrationDTOFromSession().getSelectedLanguagesByApplicant().get(0), RegistrationConstants.LABELS));
 
-				getScene(createRoot).setRoot(createRoot);
+				getScene(createRoot);
 				genericController.populateScreens();
 				return;
 			}

@@ -312,12 +312,14 @@ public class BaseController {
 	 * @return the scene
 	 */
 	protected Scene getScene(Parent borderPane) {
+		// CEIN: screens shown after login are placed in the CEIN shell (collapsible side navigation)
+		Parent root = io.mosip.registration.cein.CeinShell.wrap(borderPane);
 		scene = fXComponents.getScene();
 		if (scene == null) {
-			scene = new Scene(borderPane);
+			scene = new Scene(root);
 			fXComponents.setScene(scene);
 		}
-		scene.setRoot(borderPane);
+		scene.setRoot(root);
 		fXComponents.getStage().setScene(scene);
 		scene.setNodeOrientation(applicationContext.isPrimaryLanguageRightToLeft() ?
 				NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
@@ -1550,7 +1552,8 @@ public class BaseController {
 		if (imageView != null) {
 			Image image;
 			try {
-				image = getImage(imageName, false);
+				// CEIN: fall back to images/ when the image theme does not override the icon
+				image = getImage(imageName, true);
 				if (image != null) {
 
 					imageView.setImage(image);
@@ -1585,6 +1588,10 @@ public class BaseController {
 	}
 
 	private Image getImage(String uri) throws RegBaseCheckedException {
+		if (getClass().getResource(uri) == null) {
+			// CEIN: missing in the image theme folder, the caller falls back to images/
+			throw new RegBaseCheckedException();
+		}
         try {
 			return  new Image(getClass().getResourceAsStream(uri));
 		} catch (Exception exception) {
@@ -1594,7 +1601,8 @@ public class BaseController {
 	}
 
 	private String getConfiguredFolder() {
-		return RegistrationConstants.IMAGES.concat(imagesTheme !=null && !imagesTheme.isBlank() ? "_"+imagesTheme : "");
+		// CEIN: images_cein (recoloured icons) is the default image theme
+		return RegistrationConstants.IMAGES.concat(imagesTheme !=null && !imagesTheme.isBlank() ? "_"+imagesTheme : "_cein");
 	}
 
 	public String getImageFilePath(String configFolder,String imageName) {

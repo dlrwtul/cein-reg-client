@@ -283,7 +283,7 @@ public class PacketHandlerController extends BaseController implements Initializ
 		versionValueLabel.setText(softwareUpdateHandler.getCurrentVersion());
 
 		try {
-			setImagesOnHover();
+			// CEIN: tiles keep their icon on hover (light hover background)
 
 			setImage(syncDataImageView, RegistrationConstants.SYNC_IMG);	
 			setImage(downloadPreRegDataImageView, RegistrationConstants.DWLD_PRE_REG_DATA_IMG);
@@ -438,7 +438,7 @@ public class PacketHandlerController extends BaseController implements Initializ
 				case LOST:
 				case CORRECTION:
 					Parent createRoot = getRoot(RegistrationConstants.CREATE_PACKET_PAGE);
-					getScene(createRoot).setRoot(createRoot);
+					getScene(createRoot);
 					getScene(createRoot).getStylesheets().add(ClassLoader.getSystemClassLoader().getResource(getCssName()).toExternalForm());
 					if(registrationController.createRegistrationDTOObject(processId)) {
 						genericController.populateScreens();
@@ -483,7 +483,7 @@ public class PacketHandlerController extends BaseController implements Initializ
 					ResponseDTO packetCreationResponse = savePacket(stringWriter, registrationDTO);
 					if (packetCreationResponse.getSuccessResponseDTO() != null) {
 						Parent createRoot = getRoot(RegistrationConstants.ACK_RECEIPT_PATH);
-						getScene(createRoot).setRoot(createRoot);
+						getScene(createRoot);
 						setIsAckOpened(true);
 						LOGGER.info(PACKET_HANDLER, APPLICATION_NAME, APPLICATION_ID, "Showing receipt ended.");
 						return;
@@ -806,7 +806,7 @@ public class PacketHandlerController extends BaseController implements Initializ
 					}
 					ProcessSpecDto processSpecDto = identitySchemaDao.getProcessSpec(processSpec.getId(), version);
 					GridPane gridPane = buildRegistrationProcessPane(processSpecDto);
-					registrationGridPane.addRow(i.getAndIncrement(), gridPane);
+					addProcessTile(gridPane, i.getAndIncrement());
 				} catch (RegBaseCheckedException e) {
 					LOGGER.error("Failed to build process pane {}", processSpec, e);
 				}
@@ -816,18 +816,28 @@ public class PacketHandlerController extends BaseController implements Initializ
 		}
 	}
 
+	// CEIN: process tiles are laid out in a grid of PROCESS_TILE_COLUMNS columns
+	private static final int PROCESS_TILE_COLUMNS = 4;
+
 	private void addParentRowConstraints(int size) {
 		registrationGridPane.getRowConstraints().clear();
-		for(int i=0;i<size;i++) {
-			RowConstraints rowConstraints = new RowConstraints();
-			rowConstraints.setPercentHeight((double)100/size);
-			registrationGridPane.getRowConstraints().add(rowConstraints);
+		registrationGridPane.getColumnConstraints().clear();
+		for (int c = 0; c < PROCESS_TILE_COLUMNS; c++) {
+			javafx.scene.layout.ColumnConstraints column = new javafx.scene.layout.ColumnConstraints();
+			column.setPercentWidth(100.0 / PROCESS_TILE_COLUMNS);
+			column.setFillWidth(true);
+			registrationGridPane.getColumnConstraints().add(column);
 		}
+	}
+
+	private void addProcessTile(GridPane tile, int index) {
+		registrationGridPane.add(tile, index % PROCESS_TILE_COLUMNS, index / PROCESS_TILE_COLUMNS);
 	}
 
 	private GridPane buildRegistrationProcessPane(ProcessSpecDto processSpecDto) {
 		GridPane gridPane = new GridPane();
-		gridPane.getStyleClass().add("operationalPaneDetailsSync");
+		gridPane.getStyleClass().addAll("operationalPaneDetailsSync", "ceinProcessTile");
+		gridPane.setMaxWidth(Double.MAX_VALUE);
 		gridPane.setId(processSpecDto.getId());
 		RowConstraints rowConstraints = new RowConstraints();
 		rowConstraints.setPercentHeight(100);
@@ -841,9 +851,7 @@ public class PacketHandlerController extends BaseController implements Initializ
 			selectLanguage(event);
 		});
 		VBox vBox = new VBox();
-		vBox.setAlignment(Pos.CENTER);
-		vBox.setPrefHeight(200);
-		vBox.setPrefWidth(100);
+		vBox.setAlignment(Pos.CENTER_LEFT);
 		ImageView imageView = new ImageView();
 		imageView.setId(processSpecDto.getId()+"_img");
 		imageView.setPreserveRatio(true);
@@ -856,13 +864,16 @@ public class PacketHandlerController extends BaseController implements Initializ
 			LOGGER.error("Failed to get process image", e);
 		}
 		vBox.getChildren().add(imageView);
-		gridPane.addColumn(0, vBox);
 
 		Label label = new Label();
 		label.setText(processSpecDto.getLabel().get(ApplicationContext.applicationLanguage()));
 		label.setWrapText(true);
-		label.getStyleClass().add("operationalTitle");
-		gridPane.addColumn(1, label);
+		label.getStyleClass().addAll("operationalTitle", "ceinProcessTileTitle");
+		// CEIN: icon above the label, tile takes the whole cell
+		vBox.setSpacing(14);
+		vBox.getChildren().add(label);
+		gridPane.addColumn(0, vBox);
+		GridPane.setHgrow(vBox, javafx.scene.layout.Priority.ALWAYS);
 		changeNodeOrientation(gridPane);
 		return gridPane;
 	}

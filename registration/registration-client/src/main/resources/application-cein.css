@@ -3077,3 +3077,124 @@ Working on new Css by taleev
 .ceinLoginFooter { -fx-padding: 12 56 16 56; }
 .loginTextStyle, .loginCombobox { -fx-pref-width: 10000; -fx-min-height: 48; }
 .loginSubmitStyle { -fx-min-height: 48; -fx-font-size: 16px; }
+
+/* ---------- shell: collapsible side navigation ---------- */
+.ceinShell { -fx-background-color: -cein-bg; }
+.ceinNav {
+	-fx-background-color: white;
+	-fx-border-color: transparent -cein-line transparent transparent;
+	-fx-border-width: 0 1 0 0;
+	-fx-pref-width: 232;
+	-fx-min-width: 232;
+	-fx-max-width: 232;
+}
+.ceinNavCollapsed { -fx-pref-width: 72; -fx-min-width: 72; -fx-max-width: 72; }
+.ceinNavFlagBar { -fx-min-height: 4; -fx-max-height: 4; }
+.ceinNavBrandRow { -fx-padding: 20 20 24 20; }
+.ceinNavCollapsed .ceinNavBrandRow { -fx-padding: 20 12 24 12; }
+.ceinNavBrand { -fx-font-family: 'Space Grotesk'; -fx-font-weight: bold; -fx-font-size: 17px; }
+.ceinNavItems { -fx-padding: 0 12 0 12; }
+.ceinNavItem {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-background-radius: 8;
+	-fx-min-height: 44;
+	-fx-pref-height: 44;
+	-fx-padding: 0 12 0 12;
+	-fx-text-fill: -cein-ink-2;
+	-fx-font-family: 'Inter Medium';
+	-fx-font-size: 15px;
+}
+.ceinNavItem:hover { -fx-background-color: -cein-bg; }
+.ceinNavItem:focused { -fx-border-color: -cein-green; -fx-border-width: 2; -fx-border-radius: 8; }
+.ceinNavItem .ceinNavLabel { -fx-text-fill: -cein-ink-2; -fx-font-family: 'Inter Medium'; -fx-font-size: 15px; }
+.ceinNavItemActive { -fx-background-color: -cein-green-light; }
+.ceinNavItemActive:hover { -fx-background-color: -cein-green-light; }
+.ceinNavItemActive .ceinNavLabel { -fx-text-fill: -cein-green-dark; -fx-font-family: 'Inter SemiBold'; }
+.ceinNavIcon {
+	-fx-fill: transparent;
+	-fx-stroke: -cein-ink-2;
+	-fx-stroke-width: 1.8;
+	-fx-stroke-line-cap: round;
+	-fx-stroke-line-join: round;
+}
+.ceinNavItemActive .ceinNavIcon { -fx-stroke: -cein-green-dark; }
+.ceinNavBadge, .ceinNavBadgeMini {
+	-fx-background-color: -cein-ink;
+	-fx-background-radius: 999;
+	-fx-text-fill: white;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-alignment: center;
+}
+.ceinNavBadge { -fx-font-size: 12px; -fx-min-width: 22; -fx-min-height: 22; -fx-padding: 0 6 0 6; }
+.ceinNavBadgeMini { -fx-font-size: 10px; -fx-min-width: 16; -fx-min-height: 16; -fx-padding: 0 4 0 4; }
+.ceinNavFooter { -fx-border-color: -cein-line transparent transparent transparent; -fx-padding: 14 12 12 12; }
+.ceinNavFooter > VBox { -fx-padding: 0 8 6 8; }
+.ceinNavCenter { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 12px; }
+.ceinNavToggle { -fx-font-size: 14px; }
+
+/* ---------- top bar (Header.fxml) ---------- */
+.headerParentBorder {
+	-fx-background-color: white;
+	-fx-border-color: transparent transparent -cein-line transparent;
+	-fx-border-width: 0 0 1 0;
+	-fx-min-height: 56;
+}
+.headerDetails { -fx-background-color: white; }
+.headerDetails .label { -fx-text-fill: -cein-ink-2; -fx-font-family: 'Inter Medium'; -fx-font-size: 14px; }
+.splitLineSeparator { -fx-opacity: 0; }
+.menuBar { -fx-background-color: white; -fx-padding: 0 8 0 8; }
+.menuBar .menu { -fx-background-color: transparent; }
+.menuBar .menu:hover, .menuBar .menu:showing { -fx-background-color: -cein-bg; -fx-background-radius: 8; }
+.context-menu {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line;
+	-fx-background-radius: 8;
+	-fx-border-radius: 8;
+	-fx-padding: 6;
+	-fx-effect: dropshadow(gaussian, rgba(14, 26, 36, 0.18), 16, 0, 0, 4);
+}
+.context-menu .menu-item { -fx-padding: 8 14 8 14; -fx-background-radius: 6; }
+.context-menu .menu-item .label { -fx-text-fill: -cein-ink; -fx-font-size: 14px; }
+.context-menu .menu-item:focused { -fx-background-color: -cein-green-light; }
+.context-menu .menu-item:focused .label { -fx-text-fill: -cein-green-dark; }
+.internetModePane, .offlineModePane, .registrationOfficerIdPane { -fx-background-color: transparent; -fx-border-color: transparent; }
+
+/* ---------- home ---------- */
+.ceinHomeScroll, .ceinHomeScroll > .viewport { -fx-background-color: -cein-bg; -fx-background: -cein-bg; }
+.ceinHome { -fx-padding: 28 32 28 32; }
+.ceinNotice {
+	-fx-background-color: -cein-green-light;
+	-fx-background-radius: 8;
+	-fx-padding: 10 14 10 14;
+}
+.ceinProcessTile {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line;
+	-fx-border-radius: 12;
+	-fx-background-radius: 12;
+	-fx-padding: 22;
+	-fx-cursor: hand;
+	-fx-min-height: 120;
+}
+.ceinProcessTile:hover { -fx-border-color: -cein-green; }
+.ceinProcessTileTitle, .ceinProcessTile .operationalTitle {
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 17px;
+	-fx-text-fill: -cein-ink;
+}
+.ceinHomeList { -fx-padding: 0; }
+.ceinHomeListTitle {
+	-fx-padding: 14 20 14 20;
+	-fx-border-color: transparent transparent -cein-line-soft transparent;
+}
+.ceinHomeRow {
+	-fx-padding: 12 20 12 20;
+	-fx-border-color: transparent transparent -cein-line-soft transparent;
+	-fx-cursor: hand;
+	-fx-background-color: transparent;
+	-fx-alignment: center-left;
+	-fx-hgap: 0;
+}
+.ceinHomeRow:hover { -fx-background-color: #F8FAF9; }
+.ceinHomeRowTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
