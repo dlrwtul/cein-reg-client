@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.registration.cein.CeinSettings;
+import io.mosip.registration.cein.ThermalReceiptPrinter;
 import io.mosip.registration.config.AppConfig;
 import io.mosip.registration.constants.RegistrationConstants;
 import io.mosip.registration.constants.RegistrationUIConstants;
@@ -122,11 +124,20 @@ public class AckReceiptController extends BaseController implements Initializabl
 		LOGGER.info("REGISTRATION - UI - ACK_RECEIPT_CONTROLLER", RegistrationConstants.APPLICATION_NAME,
 				RegistrationConstants.APPLICATION_ID, "Printing the Acknowledgement Receipt");
 
-		PrinterJob job = PrinterJob.createPrinterJob();
-		if (job != null) {
-			job.getJobSettings().setJobName(getRegistrationDTOFromSession().getRegistrationId() + "_Ack");
-			webView.getEngine().print(job);
-			job.endJob();
+		String jobName = getRegistrationDTOFromSession().getRegistrationId() + "_Ack";
+		if (CeinSettings.getReceiptRollWidthMm() > 0) {
+			// CEIN: thermal roll printer (58/80 mm), see mosip.registration.cein.receipt.*
+			if (!ThermalReceiptPrinter.print(webView.getEngine(), jobName)) {
+				generateAlert(RegistrationConstants.ERROR, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.PRINT_INITIATION_FAIL));
+				return;
+			}
+		} else {
+			PrinterJob job = PrinterJob.createPrinterJob();
+			if (job != null) {
+				job.getJobSettings().setJobName(jobName);
+				webView.getEngine().print(job);
+				job.endJob();
+			}
 		}
 		generateAlert(RegistrationConstants.ALERT_INFORMATION, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.PRINT_INITIATION_SUCCESS));
 		//goToHomePageFromRegistration();
