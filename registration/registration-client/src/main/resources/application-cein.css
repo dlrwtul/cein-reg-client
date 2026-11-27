@@ -3198,3 +3198,91 @@ Working on new Css by taleev
 }
 .ceinHomeRow:hover { -fx-background-color: #F8FAF9; }
 .ceinHomeRowTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
+
+/* ---------- registration flow (GenericRegistrationLayout + GenericController) ---------- */
+.ceinFlow { -fx-background-color: -cein-bg; }
+.ceinFlowHeader {
+	-fx-background-color: white;
+	-fx-padding: 14 32 10 32;
+}
+.navigationLabel {
+	-fx-font-family: 'Space Grotesk SemiBold';
+	-fx-font-size: 20px;
+	-fx-text-fill: -cein-ink;
+}
+.ceinFlowContent { -fx-background-color: -cein-bg; }
+.ceinFlowFooter {
+	-fx-background-color: white;
+	-fx-border-color: -cein-line transparent transparent transparent;
+	-fx-border-width: 1 0 0 0;
+	-fx-padding: 12 32 12 32;
+	-fx-alignment: center-left;
+}
+.registrationErrorMsg { -fx-text-fill: -cein-error; -fx-font-size: 13px; }
+
+/* steps: the TabPane of the dynamic screens */
+.ceinFlowContent .tab-pane > .tab-header-area {
+	-fx-padding: 0 24 0 24;
+}
+.ceinFlowContent .tab-pane > .tab-header-area > .tab-header-background {
+	-fx-background-color: white;
+	-fx-border-color: transparent transparent -cein-line transparent;
+	-fx-border-width: 0 0 1 0;
+}
+.ceinFlowContent .tab-pane > .tab-header-area > .headers-region > .tab {
+	-fx-padding: 14 10 14 6;
+	-fx-border-width: 0 0 3 0;
+}
+.ceinFlowContent .tab-pane > .tab-header-area > .headers-region > .tab:disabled { -fx-opacity: 0.5; }
+.ceinStepNumberHolder { -fx-padding: 0 8 0 0; }
+.ceinStepNumber {
+	-fx-min-width: 28;
+	-fx-min-height: 28;
+	-fx-max-width: 28;
+	-fx-max-height: 28;
+	-fx-alignment: center;
+	-fx-background-radius: 14;
+	-fx-border-radius: 14;
+	-fx-border-color: #9AA6B1;
+	-fx-border-width: 1;
+	-fx-background-color: white;
+	-fx-text-fill: -cein-ink-2;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 13px;
+}
+.tab:selected .ceinStepNumber {
+	-fx-background-color: -cein-green;
+	-fx-border-color: -cein-green;
+	-fx-text-fill: white;
+}
+
+/* screen content */
+.ceinFormScroll, .ceinFormScroll > .viewport { -fx-background-color: -cein-bg; -fx-background: -cein-bg; }
+.ceinFormScreen { -fx-background-color: -cein-bg; -fx-padding: 24 32 24 32; }
+.ceinFormCard { -fx-padding: 24; }
+.ceinFormCardTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 16px; -fx-text-fill: -cein-ink; }
+
+/* field states: MOSIP "...Focused" style classes mark a field in error */
+.demoGraphicTextFieldOnType { -fx-border-color: -cein-border; -fx-border-width: 1; -fx-padding: 0 12 0 12; }
+.demoGraphicTextField:focused, .demoGraphicTextFieldOnType:focused {
+	-fx-border-color: -cein-green;
+	-fx-border-width: 2;
+	-fx-padding: 0 11 0 11;
+}
+.demoGraphicTextFieldFocused, .demoGraphicTextFieldFocused:focused, .demographicComboboxFocused {
+	-fx-border-color: -cein-error;
+	-fx-border-width: 2;
+	-fx-padding: 0 11 0 11;
+}
+.demoGraphicFieldMessageLabel { -fx-text-fill: -cein-error; -fx-font-size: 13px; -fx-padding: 4 0 0 0; }
+
+/* steps: natural width (MOSIP forces 250px tabs), white strip, error state kept */
+.tab, .tab-pane .tab { -fx-pref-width: -1; -fx-background-color: transparent; }
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label { -fx-pref-width: -1; -fx-alignment: center-left; }
+.tab-pane .tab-header-area .tab-header-background { -fx-opacity: 1; -fx-background-color: white; }
+.tab-pane:top > .tab-header-area { -fx-background-color: white; -fx-padding: 0 24 0 24; }
+.tab-pane > .tab-header-area > .headers-region > .tab.tabErrorLabel .tab-label,
+.tab-pane > .tab-header-area > .headers-region > .tab.tabErrorLabel:selected .tab-label { -fx-text-fill: -cein-error; }
+.tab.tabErrorLabel .ceinStepNumber { -fx-border-color: -cein-error; -fx-text-fill: -cein-error; }
+.tab.tabErrorLabel:selected .ceinStepNumber { -fx-background-color: -cein-error; -fx-border-color: -cein-error; -fx-text-fill: white; }
+.tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button { -fx-background-color: transparent; }

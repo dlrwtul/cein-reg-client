@@ -78,6 +78,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -426,25 +427,33 @@ public class GenericController extends BaseController {
 	private GridPane getScreenGridPane(String screenName) {
 		GridPane gridPane = new GridPane();
 		gridPane.setId(screenName);
+		// CEIN: full width content, spacing handled by the ceinFormScreen style class
+		gridPane.getStyleClass().add("ceinFormScreen");
 		RowConstraints topRowConstraints = new RowConstraints();
-		topRowConstraints.setPercentHeight(2);
 		RowConstraints midRowConstraints = new RowConstraints();
-		midRowConstraints.setPercentHeight(96);
+		midRowConstraints.setVgrow(javafx.scene.layout.Priority.ALWAYS);
 		RowConstraints bottomRowConstraints = new RowConstraints();
-		bottomRowConstraints.setPercentHeight(2);
 		gridPane.getRowConstraints().addAll(topRowConstraints,midRowConstraints, bottomRowConstraints);
 
-		ColumnConstraints columnConstraint1 = new ColumnConstraints();
-		columnConstraint1.setPercentWidth(5);
+		ColumnConstraints columnConstraint1 = new ColumnConstraints(0);
 		ColumnConstraints columnConstraint2 = new ColumnConstraints();
-		columnConstraint2.setPercentWidth(90);
-		ColumnConstraints columnConstraint3 = new ColumnConstraints();
-		columnConstraint3.setPercentWidth(5);
+		columnConstraint2.setHgrow(javafx.scene.layout.Priority.ALWAYS);
+		columnConstraint2.setFillWidth(true);
+		ColumnConstraints columnConstraint3 = new ColumnConstraints(0);
 
 		gridPane.getColumnConstraints().addAll(columnConstraint1, columnConstraint2,
 				columnConstraint3);
 
 		return gridPane;
+	}
+
+	/** CEIN: title of a field group card (groupLabel in the application language, else the first one). */
+	private String getGroupTitle(UiFieldDTO field) {
+		if (field.getGroupLabel() == null || field.getGroupLabel().isEmpty()) {
+			return null;
+		}
+		String title = field.getGroupLabel().get(ApplicationContext.applicationLanguage());
+		return title != null ? title : field.getGroupLabel().values().iterator().next();
 	}
 
 	private GridPane getScreenGroupGridPane(String id, GridPane screenGridPane) {
@@ -457,6 +466,7 @@ public class GenericController extends BaseController {
 		groupGridPane.getColumnConstraints().add(columnConstraint);
 		groupGridPane.setHgap(20);
 		groupGridPane.setVgap(20);
+		groupGridPane.getStyleClass().add("ceinFormColumn");
 		return groupGridPane;
 	}
 
@@ -726,30 +736,45 @@ public class GenericController extends BaseController {
 			
 			Tab screenTab = new Tab();
 			screenTab.setId(screenDTO.getName()+"_tab");
+			io.mosip.registration.cein.CeinFormLayout.numberTab(screenTab, tabPane.getTabs().size() + 1);
 			screenTab.setText(tabNameInApplicationLanguage == null ?
 					labels.get(0) : tabNameInApplicationLanguage);
 			screenTab.setTooltip(new Tooltip(String.join(RegistrationConstants.SLASH, labels)));
 
 			GridPane screenGridPane = getScreenGridPane(screenDTO.getName());
 			screenGridPane.prefWidthProperty().bind(tabPane.widthProperty());
-			screenGridPane.prefHeightProperty().bind(tabPane.heightProperty());
+			screenGridPane.minHeightProperty().bind(tabPane.heightProperty().subtract(60));
 
 			int rowIndex = 0;
 			GridPane gridPane = getScreenGroupGridPane(screenGridPane.getId()+"_col_1", screenGridPane);
 
 			if(screenDTO.isPreRegFetchRequired()) {
-				gridPane.add(getPreRegistrationFetchComponent(), 0, rowIndex++);
+				VBox preRegCard = io.mosip.registration.cein.CeinFormLayout.card(null);
+				preRegCard.getChildren().add(getPreRegistrationFetchComponent());
+				gridPane.add(preRegCard, 0, rowIndex++);
 			}
 			if(screenDTO.isAdditionalInfoRequestIdRequired()) {
 				additionalInfoReqIdScreenOrder = screenDTO.getOrder();
-				gridPane.add(getAdditionalInfoRequestIdComponent(), 0, rowIndex++);
+				VBox additionalInfoCard = io.mosip.registration.cein.CeinFormLayout.card(null);
+				additionalInfoCard.getChildren().add(getAdditionalInfoRequestIdComponent());
+				gridPane.add(additionalInfoCard, 0, rowIndex++);
 			}
 
+			// CEIN: one card per UI spec group (title = groupLabel), one row per alignment group
+			VBox groupCard = null;
+			String currentGroup = null;
 			for(Entry<String, List<UiFieldDTO>> groupEntry : screenFieldGroups.entrySet()) {
-				FlowPane groupFlowPane = new FlowPane();
-				groupFlowPane.prefWidthProperty().bind(gridPane.widthProperty());
-				groupFlowPane.setHgap(20);
-				groupFlowPane.setVgap(20);
+				UiFieldDTO firstField = groupEntry.getValue().get(0);
+				String fieldGroup = firstField.getGroup() == null ? "" : firstField.getGroup();
+				if (groupCard == null || !fieldGroup.equals(currentGroup)) {
+					currentGroup = fieldGroup;
+					groupCard = io.mosip.registration.cein.CeinFormLayout.card(getGroupTitle(firstField));
+					io.mosip.registration.cein.CeinFormLayout.watchCard(groupCard);
+					gridPane.add(groupCard, 0, rowIndex++);
+				}
+
+				FlowPane groupFlowPane = io.mosip.registration.cein.CeinFormLayout.row(new FlowPane());
+				groupFlowPane.prefWidthProperty().bind(groupCard.widthProperty().subtract(48));
 
 				for(UiFieldDTO fieldDTO : groupEntry.getValue()) {
 					try {
@@ -762,13 +787,14 @@ public class GenericController extends BaseController {
 						LOGGER.error("Failed to build control " + fieldDTO.getId(), exception);
 					}
 				}
-				gridPane.add(groupFlowPane, 0, rowIndex++);
+				groupCard.getChildren().add(groupFlowPane);
 			}
 
-			screenGridPane.setStyle("-fx-background-color: white;");
 			screenGridPane.add(gridPane, 1, 1);
 			final ScrollPane scrollPane = new ScrollPane(screenGridPane);
 			scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+			scrollPane.setFitToWidth(true);
+			scrollPane.getStyleClass().add("ceinFormScroll");
 			scrollPane.setId("scrollPane");
 			screenTab.setContent(scrollPane);
 			tabPane.getTabs().add(screenTab);
@@ -797,6 +823,7 @@ public class GenericController extends BaseController {
 		previewScreen.setText(ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS)
 				.getString(RegistrationConstants.previewHeader));
 		previewScreen.setTooltip(new Tooltip(String.join(RegistrationConstants.SLASH, previewLabels)));
+		io.mosip.registration.cein.CeinFormLayout.numberTab(previewScreen, tabPane.getTabs().size() + 1);
 		tabPane.getTabs().add(previewScreen);
 
 		Tab authScreen = new Tab();
@@ -804,6 +831,7 @@ public class GenericController extends BaseController {
 		authScreen.setText(ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS)
 				.getString(RegistrationConstants.authentication));
 		authScreen.setTooltip(new Tooltip(String.join(RegistrationConstants.SLASH, authLabels)));
+		io.mosip.registration.cein.CeinFormLayout.numberTab(authScreen, tabPane.getTabs().size() + 1);
 		tabPane.getTabs().add(authScreen);
 	}
 
