@@ -122,6 +122,7 @@ défaut s'applique quand la clé est absente.
 | `mosip.registration.cein.receipt.paper` | `80` | `80` ou `58` = rouleau thermique de cette largeur en mm, `A4` = impression MOSIP standard |
 | `mosip.registration.cein.receipt.printable-width-mm` | `72` (rouleau 80), `48` (rouleau 58) | Largeur réellement imprimable de la tête |
 | `mosip.registration.cein.receipt.printer-name` | vide | Partie du nom de l'imprimante du reçu (par exemple `TM-T20`). Vide = imprimante par défaut |
+| `mosip.registration.cein.window.min-width` / `min-height` | `1280` / `720` | Taille minimale de la fenêtre. Le client s'ouvre maximisé et reste redimensionnable (avant : taille de l'écran, non redimensionnable) |
 
 ### Impression thermique du reçu
 
