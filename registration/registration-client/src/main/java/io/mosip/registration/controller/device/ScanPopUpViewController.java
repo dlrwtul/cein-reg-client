@@ -67,8 +67,6 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 	private Text totalScannedPages;
 	@FXML
 	private Button saveBtn;
-	@FXML
-	private Text scanningMsg;
 	/*@FXML
 	private Hyperlink closeButton;*/
 	@FXML
@@ -128,6 +126,8 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 	private Button browseBtn;
 	@FXML
 	private ImageView browseImageView;
+	@FXML
+	private Text scanningMsg;
 
 	@Value("${mosip.doc.stage.width:1200}")
 	private int width;
