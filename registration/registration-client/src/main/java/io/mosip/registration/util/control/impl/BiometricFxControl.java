@@ -156,10 +156,15 @@ public class BiometricFxControl extends FxControl {
 			default:
 				modalityListingNode = new VBox();
 				modalityListingNode.setId(uiFieldDTO.getId()+"_listing");
-				((VBox)modalityListingNode).setSpacing(10);
-				modalityListingNode.getStyleClass().add("ceinBioModalities");
+				modalityListingNode.getStyleClass().addAll("ceinCard", "ceinBioModalities");
 				((VBox)modalityListingNode).getChildren().addAll(modalityList);
+				Label modalitiesNote = new Label(ApplicationContext.getInstance().getBundle(ApplicationContext.applicationLanguage(),
+						RegistrationConstants.LABELS).getString("ceinBioModalitiesNote"));
+				modalitiesNote.setWrapText(true);
+				modalitiesNote.getStyleClass().add("ceinBioModalitiesNote");
+				((VBox)modalityListingNode).getChildren().add(modalitiesNote);
 				gridPane.add(modalityListingNode,0,1);
+				GridPane.setValignment(modalityListingNode, VPos.TOP);
 				Parent captureDetails = null;
 				try {
 					captureDetails = BaseController.loadWithNewInstance(getClass().getResource("/fxml/BiometricsCapture.fxml"),
@@ -199,8 +204,9 @@ public class BiometricFxControl extends FxControl {
 		gridPane.getRowConstraints().addAll(topRowConstraints, midRowConstraints);
 
 		ColumnConstraints columnConstraint1 = new ColumnConstraints();
-		columnConstraint1.setMinWidth(130);
-		columnConstraint1.setPrefWidth(130);
+		columnConstraint1.setMinWidth(220);
+		columnConstraint1.setPrefWidth(260);
+		columnConstraint1.setMaxWidth(280);
 		ColumnConstraints columnConstraint2 = new ColumnConstraints();
 		columnConstraint2.setHgrow(Priority.ALWAYS);
 		ColumnConstraints columnConstraint3 = new ColumnConstraints();
@@ -225,7 +231,9 @@ public class BiometricFxControl extends FxControl {
 					modalityView.setSpacing(10);
 					modalityView.setId(uiFieldDTO.getId() + modality);
 
-					modalityView.getChildren().add(addModalityButton(modality));
+					Button modalityButton = addModalityButton(modality);
+					HBox.setHgrow(modalityButton, Priority.ALWAYS);
+					modalityView.getChildren().add(modalityButton);
 					modalityList.add(modalityView);
 
 					if(currentModality == null)
@@ -250,35 +258,45 @@ public class BiometricFxControl extends FxControl {
 	}
 
 	private Button addModalityButton(Modality modality) {
+		// CEIN (design "Biometrie"): one row per modality, its name and its capture status
 		Button button = new Button();
 		button.setId(uiFieldDTO.getId()+ modality+"Button");
-		
-		button.setMaxSize(100, 90);
-		button.setMinSize(100, 90);
-		button.setPrefSize(100, 90);
+		button.setMaxWidth(Double.MAX_VALUE);
+		button.setMnemonicParsing(false);
 
-		List<BiometricsDto> capturedData = getRegistrationDTo().getBiometric(uiFieldDTO.getId(), modality.getAttributes());
-		
-		try {
-			/*if(Modality.EXCEPTION_PHOTO == modality) {
-				image = getExceptionDocumentAsImage();
-			}*/
-			Image image = !capturedData.isEmpty() ? biometricsController.getBioStreamImage(uiFieldDTO.getId(), modality,
-						capturedData.get(0).getNumOfRetries()) : biometricsController.getImage(getImageIconPath(modality.name()),true);
-			button.setGraphic(getImageView(image, 80));
-		} catch (RegBaseCheckedException exception) {
-			LOGGER.error("Exception while Getting Image", exception);
-		}
-		
-		button.getStyleClass().add(RegistrationConstants.MODALITY_BUTTONS);
-		Tooltip tooltip = new Tooltip(ApplicationContext.getInstance().getBundle(ApplicationContext.applicationLanguage(),
+		Label title = new Label(ApplicationContext.getInstance().getBundle(ApplicationContext.applicationLanguage(),
 				RegistrationConstants.LABELS).getString(modality.name()));
+		title.getStyleClass().add("ceinModalityTitle");
+		Label status = new Label();
+		status.getStyleClass().add("ceinModalityStatus");
+		VBox texts = new VBox(2, title, status);
+		texts.setMouseTransparent(true);
+		button.setGraphic(texts);
+
+		button.getStyleClass().addAll(RegistrationConstants.MODALITY_BUTTONS, "ceinModality");
+		Tooltip tooltip = new Tooltip(title.getText());
 		tooltip.getStyleClass().add(RegistrationConstants.TOOLTIP_STYLE);
 		button.setTooltip(tooltip);
 		button.setOnAction(getModalityActionHandler(this, modality));
 		return button;
 	}
 
+	/** CEIN: highlights the modality shown in the capture panel. */
+	private void markSelectedModality(Modality modality) {
+		if (this.node == null) {
+			return;
+		}
+		for (Modality each : Modality.values()) {
+			Node row = getField(uiFieldDTO.getId() + each);
+			if (row instanceof HBox && !((HBox) row).getChildren().isEmpty()) {
+				Node button = ((HBox) row).getChildren().get(0);
+				button.getStyleClass().remove("ceinModalitySelected");
+				if (each == modality) {
+					button.getStyleClass().add("ceinModalitySelected");
+				}
+			}
+		}
+	}
 
 	private EventHandler getModalityActionHandler(BiometricFxControl control, Modality modality) {
 		return new EventHandler<ActionEvent>() {
@@ -298,6 +316,7 @@ public class BiometricFxControl extends FxControl {
 		if(modality == null)
 			return;
 
+		markSelectedModality(modality);
 		List<String> requiredAttributes = requiredFieldValidator.getRequiredBioAttributes(uiFieldDTO, getRegistrationDTo());
 		List<String> configBioAttributes = ListUtils.intersection(requiredAttributes, Modality.getAllBioAttributes(modality));
 		List<String> nonConfigBioAttributes = ListUtils.subtract(Modality.getAllBioAttributes(modality), configBioAttributes);
@@ -433,7 +452,9 @@ public class BiometricFxControl extends FxControl {
 		button.setTooltip(tooltip);
 		button.setOnAction(getModalityActionHandler(this, Modality.EXCEPTION_PHOTO));*/
 
-		modalityView.getChildren().add(addModalityButton(Modality.EXCEPTION_PHOTO));
+		Button exceptionPhotoButton = addModalityButton(Modality.EXCEPTION_PHOTO);
+		HBox.setHgrow(exceptionPhotoButton, Priority.ALWAYS);
+		modalityView.getChildren().add(exceptionPhotoButton);
 		addRemoveCaptureStatusMark(modalityView, Modality.EXCEPTION_PHOTO);
 
 		boolean exceptionExists = getRegistrationDTo().isBiometricExceptionAvailable(this.uiFieldDTO.getId());
@@ -466,22 +487,7 @@ public class BiometricFxControl extends FxControl {
 		if(tempNode == null)
 			return;
 
-		HBox modalityView = (HBox) tempNode;
-		Button button = (Button) modalityView.getChildren().get(0);
-		Image image = null;
-		List<BiometricsDto> capturedData = getRegistrationDTo().getBiometric(uiFieldDTO.getId(), modality.getAttributes());
-		if(!capturedData.isEmpty()) {
-			Optional<BiometricsDto> bestCopy = capturedData.stream().sorted(Comparator.comparingDouble(BiometricsDto::getQualityScore)).findFirst();
-			image = biometricsController.getBioStreamImage(uiFieldDTO.getId(), modality,
-					bestCopy.isPresent() ? bestCopy.get().getNumOfRetries() : 1);
-		} else {
-			image = biometricsController.getBioStreamImage(uiFieldDTO.getId(), modality, 0);
-		}
-
-		button.setGraphic(getImageView(image, 80));
-		button.setPrefSize(105, 80);
-
-		addRemoveCaptureStatusMark(modalityView, modality);
+		addRemoveCaptureStatusMark((HBox) tempNode, modality);
 		displayExceptionPhoto();
 	}
 
@@ -489,23 +495,38 @@ public class BiometricFxControl extends FxControl {
 		if (pane.getChildren().size() > 1) {
 			pane.getChildren().remove(1);
 		}
+		if (pane.getChildren().isEmpty() || !(pane.getChildren().get(0) instanceof Button)
+				|| !(((Button) pane.getChildren().get(0)).getGraphic() instanceof VBox)) {
+			return;
+		}
+		Label status = (Label) ((VBox) ((Button) pane.getChildren().get(0)).getGraphic()).getChildren().get(1);
+		status.getStyleClass().removeAll("ceinModalityOk", "ceinModalityWarn");
+		java.util.ResourceBundle labels = ApplicationContext.getInstance().getBundle(ApplicationContext.applicationLanguage(),
+				RegistrationConstants.LABELS);
 
-		boolean isExceptionsMarked = isAnyExceptions(modality);
-		boolean isCaptured = !getRegistrationDTo().getBiometric(uiFieldDTO.getId(), modality.getAttributes()).isEmpty();
-		if(modality.equals(Modality.EXCEPTION_PHOTO) && biometricsController.isBiometricExceptionProofCollected(uiFieldDTO.getId())) {
-			pane.getChildren().add(addCompletionImg(getCompletionImgPath(false)));
+		List<BiometricsDto> captured = getRegistrationDTo().getBiometric(uiFieldDTO.getId(), modality.getAttributes());
+		boolean isCaptured = !captured.isEmpty();
+		if (modality.equals(Modality.EXCEPTION_PHOTO)) {
+			boolean collected = biometricsController.isBiometricExceptionProofCollected(uiFieldDTO.getId());
+			status.setText(labels.getString(collected ? "ceinBioStatusPhotoDone" : "ceinBioStatusPhotoRequired"));
+			status.getStyleClass().add(collected ? "ceinModalityOk" : "ceinModalityWarn");
 			return;
 		}
 
-		if(isExceptionsMarked) {
-			pane.getChildren().add(addCompletionImg(getCompletionImgPath(true)));
+		long exceptions = modalityAttributeMap.containsKey(modality) ? modalityAttributeMap.get(modality).get(0).stream()
+				.filter(attr -> biometricsController.isBiometricExceptionAvailable(uiFieldDTO.getId(), attr)).count() : 0;
+		if (exceptions > 0) {
+			status.setText(java.text.MessageFormat.format(labels.getString(isCaptured ? "ceinBioStatusCapturedExceptions"
+					: "ceinBioStatusExceptions"), exceptions));
 			return;
 		}
-
-		if(isCaptured) {
-			pane.getChildren().add(addCompletionImg(getCompletionImgPath(false)));
+		if (isCaptured) {
+			double quality = captured.stream().mapToDouble(BiometricsDto::getQualityScore).average().orElse(0);
+			status.setText(java.text.MessageFormat.format(labels.getString("ceinBioStatusCaptured"), Math.round(quality)));
+			status.getStyleClass().add("ceinModalityOk");
 			return;
 		}
+		status.setText(labels.getString("ceinBioStatusTodo"));
 	}
 
 

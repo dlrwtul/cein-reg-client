@@ -570,44 +570,85 @@
 .tab.tabErrorLabel:selected .ceinStepNumber { -fx-background-color: -cein-error; -fx-border-color: -cein-error; -fx-text-fill: white; }
 .tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button { -fx-background-color: transparent; }
 
-/* ---------- document scan window (Scan.fxml) ---------- */
-.ceinScan { -fx-background-color: -cein-bg; -fx-padding: 20; -fx-hgap: 20; }
-.ceinScanPreview {
+/* ---------- shared dialog parts (design: dialogs, scan window) ---------- */
+.ceinDialogHeader {
 	-fx-background-color: white;
-	-fx-border-color: -cein-line;
-	-fx-border-radius: 10;
-	-fx-background-radius: 10;
-	-fx-padding: 12;
+	-fx-min-height: 64;
+	-fx-padding: 0 16 0 24;
+	-fx-border-color: transparent transparent -cein-line transparent;
+	-fx-border-width: 0 0 1 0;
 }
-.ceinScanScroll, .ceinScanScroll > .viewport { -fx-background-color: white; -fx-background: white; -fx-border-color: transparent; }
-.ceinScanPager { -fx-padding: 4 0 0 0; }
-.ceinScanPageNo { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-fill: -cein-ink; }
-.ceinLink { -fx-text-fill: -cein-green; -fx-font-family: 'Inter SemiBold'; -fx-cursor: hand; }
-.ceinLink:disabled { -fx-text-fill: #9AA6B1; -fx-opacity: 1; }
-.ceinScanActions {
+.ceinDialogTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 18px; -fx-text-fill: -cein-ink; }
+.ceinDialogFooter {
 	-fx-background-color: white;
-	-fx-border-color: -cein-line;
-	-fx-border-radius: 10;
-	-fx-background-radius: 10;
-	-fx-padding: 18;
+	-fx-min-height: 68;
+	-fx-padding: 0 24 0 24;
+	-fx-border-color: -cein-line transparent transparent transparent;
+	-fx-border-width: 1 0 0 0;
 }
-.ceinScanAction {
-	-fx-alignment: center-left;
-	-fx-padding: 0 14 0 14;
-	-fx-min-height: 42;
+.ceinIconButton {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40;
 	-fx-background-radius: 8;
-	-fx-border-radius: 8;
+	-fx-padding: 0;
+	-fx-cursor: hand;
 }
-.ceinScanAction:hover { -fx-background-color: -cein-green-light; -fx-border-color: -cein-green; -fx-text-fill: -cein-ink; }
-.ceinScanAction:disabled { -fx-opacity: 0.45; }
-.ceinScanPrimary { -fx-border-color: -cein-green; -fx-border-width: 2; -fx-font-family: 'Inter SemiBold'; }
-.ceinScanDanger { -fx-text-fill: -cein-error; -fx-border-color: -cein-error-border; }
-.ceinScanDanger:hover { -fx-background-color: #FBEDEC; -fx-border-color: -cein-error; -fx-text-fill: -cein-error; }
-.ceinScanSeparator { -fx-padding: 4 0 4 0; }
-.ceinScanMessage { -fx-font-size: 13px; -fx-fill: -cein-muted; }
-.ceinScanSave { -fx-min-height: 46; }
+.ceinIconButton:hover { -fx-background-color: -cein-bg; }
+.ceinIconStroke {
+	-fx-fill: transparent;
+	-fx-stroke: -cein-ink-2;
+	-fx-stroke-width: 1.8;
+	-fx-stroke-line-cap: round;
+	-fx-stroke-line-join: round;
+}
+.ceinIconOnPrimary { -fx-stroke: white; }
+.ceinIconDanger { -fx-stroke: -cein-error; }
+.button:disabled .ceinIconStroke { -fx-opacity: 0.5; }
+.ceinOverline { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 12px; -fx-text-fill: -cein-muted; }
 
-/* ---------- biometric capture (BiometricFxControl, BiometricsCapture, GenericBiometricFXML) ---------- */
+/* ---------- document scan window (Scan.fxml, design "Scan") ---------- */
+.ceinScan { -fx-background-color: white; }
+.ceinScanPreviewColumn { -fx-background-color: -cein-line-soft; }
+.ceinScanPreview { -fx-background-color: -cein-line-soft; -fx-padding: 20; }
+.ceinScanScroll, .ceinScanScroll > .viewport { -fx-background-color: -cein-line-soft; -fx-background: -cein-line-soft; -fx-border-color: transparent; }
+.ceinScanScroll .image-view { -fx-effect: dropshadow(gaussian, rgba(14,26,36,0.18), 8, 0, 0, 2); }
+.ceinScanStrip {
+	-fx-background-color: white;
+	-fx-min-height: 104;
+	-fx-pref-height: 104;
+	-fx-padding: 0 20 0 20;
+	-fx-border-color: -cein-line transparent transparent transparent;
+	-fx-border-width: 1 0 0 0;
+}
+.ceinScanThumbScroll, .ceinScanThumbScroll > .viewport { -fx-background-color: white; -fx-background: white; -fx-border-color: transparent; -fx-padding: 0; }
+.ceinScanThumbs { -fx-padding: 6 0 6 0; }
+.ceinScanThumb {
+	-fx-min-width: 56; -fx-pref-width: 56; -fx-max-width: 56;
+	-fx-min-height: 76; -fx-pref-height: 76; -fx-max-height: 76;
+	-fx-background-color: white;
+	-fx-border-color: -cein-border;
+	-fx-border-width: 1;
+	-fx-border-radius: 4;
+	-fx-background-radius: 4;
+	-fx-padding: 3 3 2 3;
+	-fx-cursor: hand;
+}
+.ceinScanThumbSelected { -fx-border-color: -cein-green; -fx-border-width: 2; }
+.ceinScanThumbNumber { -fx-font-size: 12px; -fx-text-fill: -cein-muted; }
+.ceinScanThumbSelected .ceinScanThumbNumber { -fx-font-family: 'Inter SemiBold'; -fx-text-fill: -cein-green-dark; }
+.ceinScanSide {
+	-fx-background-color: white;
+	-fx-padding: 24;
+	-fx-border-color: transparent transparent transparent -cein-line;
+	-fx-border-width: 0 0 0 1;
+}
+.ceinScanFull { -fx-min-height: 44; -fx-font-family: 'Inter SemiBold'; -fx-font-size: 15px; -fx-alignment: center; }
+.ceinScanSource { -fx-pref-height: 44; }
+.ceinScanMessage { -fx-font-size: 13px; -fx-fill: -cein-green-dark; }
+.ceinLink { -fx-text-fill: -cein-green; -fx-font-family: 'Inter SemiBold'; -fx-cursor: hand; }
+
+/* ---------- biometric capture (BiometricFxControl, BiometricsCapture, GenericBiometricFXML; design "Biometrie") ---------- */
 .ceinBioField { -fx-background-color: transparent; }
 .ceinBioFieldLabel, .qualityBoxLabel.ceinBioFieldLabel {
 	-fx-font-family: 'Inter SemiBold';
@@ -615,33 +656,54 @@
 	-fx-text-fill: -cein-ink;
 	-fx-padding: 0;
 }
-.modalityButtons {
+/* modality list: one row per modality with its status */
+.ceinBioModalities { -fx-padding: 0; -fx-spacing: 0; }
+.modalityButtons, .ceinModality {
 	-fx-background-color: white;
-	-fx-border-color: -cein-line;
-	-fx-border-width: 1;
-	-fx-border-radius: 10;
-	-fx-background-radius: 10;
+	-fx-background-radius: 0;
+	-fx-border-color: transparent transparent -cein-line-soft transparent;
+	-fx-border-width: 0 0 1 0;
+	-fx-border-radius: 0;
+	-fx-padding: 14 18 14 18;
+	-fx-alignment: center-left;
 	-fx-cursor: hand;
+	-fx-min-height: 0;
 }
-.modalityButtons:hover { -fx-border-color: -cein-green; -fx-background-color: #F8FAF9; }
-.modalityButtons:focused { -fx-border-color: -cein-green; -fx-border-width: 2; }
-.ceinBioCard { -fx-padding: 20 24 20 24; }
-.ceinBioSide { -fx-padding: 18; }
+.ceinModality:hover { -fx-background-color: #F8FAF9; }
+.ceinModality:focused { -fx-background-insets: 0; }
+.ceinModalitySelected {
+	-fx-background-color: #F4F9F6;
+	-fx-border-color: transparent transparent -cein-line-soft -cein-green;
+	-fx-border-width: 0 0 1 3;
+	-fx-padding: 14 18 14 15;
+}
+.ceinModalitySelected:hover { -fx-background-color: #F4F9F6; }
+.ceinModalityTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
+.ceinModalityStatus { -fx-font-size: 13px; -fx-text-fill: -cein-muted; }
+.ceinModalityOk { -fx-text-fill: -cein-green-dark; }
+.ceinModalityWarn { -fx-text-fill: -cein-warning; }
+.ceinBioModalitiesNote {
+	-fx-font-size: 12px;
+	-fx-text-fill: -cein-muted;
+	-fx-padding: 14 18 14 18;
+}
+/* capture panel */
+.ceinBioCapture { -fx-background-color: transparent; }
+.ceinBioCard { -fx-padding: 24; }
 .ceinBioTitle, .biometricTypeLabel {
 	-fx-font-family: 'Space Grotesk SemiBold';
-	-fx-font-size: 18px;
+	-fx-font-size: 20px;
 	-fx-text-fill: -cein-ink;
 	-fx-padding: 0;
 }
+.ceinBioInstruction { -fx-font-size: 14px; -fx-text-fill: -cein-muted; }
+.ceinBioStage { -fx-background-color: -cein-bg; -fx-background-radius: 10; -fx-padding: 24; }
 .biometricPaneSelected, .fingerPrintPanesSelected {
-	-fx-background-color: #F4F6F5;
-	-fx-border-color: -cein-line;
-	-fx-border-width: 1;
-	-fx-border-radius: 12;
-	-fx-background-radius: 12;
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-border-width: 0;
 	-fx-padding: 0;
 }
-.biometricPaneSelected { -fx-border-color: -cein-green; -fx-border-width: 2; }
 .onboardScanBtn, .ceinBioScan {
 	-fx-background-color: -cein-green;
 	-fx-border-color: -cein-green;
@@ -649,93 +711,140 @@
 	-fx-font-family: 'Inter SemiBold';
 	-fx-font-size: 15px;
 	-fx-min-height: 44;
-	-fx-padding: 0 28 0 22;
+	-fx-padding: 0 22 0 22;
 	-fx-background-radius: 8;
 	-fx-border-radius: 8;
 }
 .onboardScanBtn:hover, .onboardScanBtn:pressed { -fx-background-color: -cein-green-hover; -fx-border-color: -cein-green-hover; -fx-text-fill: white; }
 .onboardScanBtn:disabled { -fx-background-color: -cein-line; -fx-border-color: -cein-line; -fx-text-fill: #6B7783; -fx-opacity: 1; }
-.ceinBioMeasures {
-	-fx-padding: 14 0 0 0;
-	-fx-border-color: -cein-line-soft transparent transparent transparent;
-	-fx-border-width: 1 0 0 0;
+.ceinBioQualityValue { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 28px; -fx-text-fill: -cein-ink; }
+.ceinBioVerdict { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 13px; }
+.labelGreen { -fx-text-fill: -cein-green-dark; }
+.labelRed { -fx-text-fill: -cein-error; }
+.ceinBioQualityValue.labelGreen, .ceinBioQualityValue.labelRed { -fx-text-fill: -cein-ink; }
+.ceinBioProgress, .ceinBioProgress > .track { -fx-pref-height: 10; }
+.ceinBioProgress > .track { -fx-background-color: -cein-line-soft; -fx-background-radius: 5; -fx-background-insets: 0; }
+.ceinBioProgress > .bar { -fx-background-radius: 5; -fx-background-insets: 0; -fx-padding: 5; }
+.progress-barGreen > .bar { -fx-background-color: -cein-green; }
+.progress-barRed > .bar { -fx-background-color: -cein-error; }
+#thresholdBar { -fx-border-color: -cein-ink; -fx-border-width: 0 2 0 0; }
+.ceinBioAttemptsBlock {
+	-fx-padding: 14 0 14 0;
+	-fx-border-color: -cein-line-soft transparent -cein-line-soft transparent;
+	-fx-border-width: 1 0 1 0;
 }
+/* attempts: "Attempt n / score" cards, the selected one has a green border */
+.qualityLabelGrey, .qualityLabelGreen, .qualityLabelRed {
+	-fx-min-height: 56;
+	-fx-pref-height: 56;
+	-fx-background-color: white;
+	-fx-background-radius: 8;
+	-fx-border-radius: 8;
+	-fx-border-width: 1;
+	-fx-border-color: -cein-border;
+	-fx-alignment: center;
+	-fx-text-alignment: center;
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 13px;
+	-fx-cursor: hand;
+}
+.qualityLabelGrey { -fx-text-fill: #9AA6B1; -fx-cursor: default; }
+.qualityLabelGreen { -fx-text-fill: -cein-ink; }
+.qualityLabelRed { -fx-text-fill: -cein-error; }
+.qualityLabelBlueBorder { -fx-border-color: -cein-green; -fx-border-width: 2; }
+.ceinBioHint { -fx-font-size: 12px; -fx-text-fill: -cein-muted; }
 .ceinBioMeasureLabel, .qualityLabel, .attemptsLabel, .threshHoldLabel, .exceptionLabel, .mdsQualityLabel, .sdkQualityLabel {
 	-fx-font-family: 'Inter Medium';
 	-fx-font-size: 13px;
 	-fx-text-fill: -cein-muted;
 }
-.ceinBioThreshold { -fx-font-size: 12px; -fx-text-fill: -cein-muted; }
-.ceinBioQualityValue, .ceinBioScoreValue { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-text-fill: -cein-ink; }
-.labelGreen { -fx-text-fill: -cein-green; }
-.labelRed { -fx-text-fill: -cein-error; }
-.ceinBioProgress, .ceinBioProgress > .track { -fx-pref-height: 12; }
-.ceinBioProgress > .track { -fx-background-color: -cein-line-soft; -fx-background-radius: 6; -fx-background-insets: 0; }
-.ceinBioProgress > .bar { -fx-background-radius: 6; -fx-background-insets: 0; -fx-padding: 6; }
-.progress-barGreen > .bar { -fx-background-color: -cein-green; }
-.progress-barRed > .bar { -fx-background-color: -cein-error; }
-#thresholdBar { -fx-border-color: -cein-ink; -fx-border-width: 0 2 0 0; }
-/* attempts: selectable chips (click to show the image and score of that attempt) */
-.qualityLabelGrey, .qualityLabelGreen, .qualityLabelRed {
-	-fx-min-width: 34;
-	-fx-min-height: 34;
-	-fx-pref-width: 34;
-	-fx-pref-height: 34;
-	-fx-background-radius: 17;
-	-fx-border-radius: 17;
-	-fx-border-width: 1;
-	-fx-alignment: center;
-	-fx-font-family: 'Inter SemiBold';
-	-fx-font-size: 13px;
-	-fx-cursor: hand;
-}
-.qualityLabelGrey { -fx-background-color: white; -fx-border-color: -cein-border; -fx-text-fill: -cein-muted; }
-.qualityLabelGreen { -fx-background-color: -cein-green; -fx-border-color: -cein-green; -fx-text-fill: white; }
-.qualityLabelRed { -fx-background-color: #FBEDEC; -fx-border-color: -cein-error; -fx-text-fill: -cein-error; }
+.attemptsLabel.ceinFieldLabel { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-text-fill: -cein-ink; }
+.ceinBioScoreValue { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-text-fill: -cein-ink; }
 .ceinBioScores { -fx-padding: 4 0 0 0; }
 .photoAlert { -fx-text-fill: -cein-error; -fx-font-size: 13px; }
 .ceinBioWindow { -fx-background-color: -cein-bg; }
 .ceinBioWindowBody { -fx-padding: 20; }
-.ceinWindowHeader {
-	-fx-background-color: white;
-	-fx-border-color: transparent transparent -cein-line transparent;
-	-fx-border-width: 0 0 1 0;
-	-fx-padding: 10 16 10 24;
-	-fx-min-height: 52;
-}
-.ceinWindowTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 17px; -fx-text-fill: -cein-ink; }
-.ceinWindowClose { -fx-padding: 6; -fx-border-color: transparent; }
 
-/* ---------- operator authentication (OperatorAuthentication.fxml, last step) ---------- */
-.photoCapturePanes, .fingerPrintPanes, .fingerPrintPanes:focused, .IrisPanes, .IrisPanes:focused, .IrisPanesSelected {
-	-fx-background-color: #F4F6F5;
-	-fx-border-color: -cein-line;
-	-fx-border-width: 1;
-	-fx-border-radius: 12;
-	-fx-background-radius: 12;
+/* ---------- operator authentication (OperatorAuthentication.fxml, design "AuthOperateur") ---------- */
+.ceinAuth { -fx-background-color: -cein-bg; }
+.ceinAuthBody { -fx-padding: 24 32 24 32; -fx-background-color: -cein-bg; }
+.ceinAuthTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 20px; -fx-text-fill: -cein-ink; }
+.ceinAuthCard { -fx-padding: 24; }
+.ceinAuthCurrent { -fx-border-color: -cein-green; -fx-border-width: 2; -fx-padding: 23; }
+.ceinAuthBadge {
+	-fx-min-width: 32; -fx-min-height: 32; -fx-max-width: 32; -fx-max-height: 32;
+	-fx-background-radius: 16; -fx-border-radius: 16;
+	-fx-border-color: #9AA6B1; -fx-border-width: 1;
+	-fx-background-color: white;
+}
+.ceinAuthBadgeText { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-text-fill: -cein-ink-2; }
+.ceinAuthBadgeCurrent { -fx-background-color: -cein-green; -fx-border-color: -cein-green; }
+.ceinAuthBadgeCurrent .ceinAuthBadgeText { -fx-text-fill: white; }
+.ceinAuthBadgeDone { -fx-background-color: white; -fx-border-color: -cein-green; -fx-border-width: 2; }
+.ceinAuthBadgeCheck { -fx-fill: transparent; -fx-stroke: -cein-green; -fx-stroke-width: 2.6; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; -fx-scale-x: 0.7; -fx-scale-y: 0.7; }
+.ceinAuthCardTitle { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 16px; -fx-text-fill: -cein-ink; }
+.ceinAuthStatus { -fx-font-size: 13px; -fx-text-fill: -cein-muted; }
+.ceinAuthStatusOk { -fx-text-fill: -cein-green-dark; }
+.ceinAuthStatusWarn { -fx-text-fill: -cein-warning; }
+.ceinAuthTerm { -fx-font-size: 14px; -fx-text-fill: -cein-muted; }
+.ceinAuthValue { -fx-font-size: 14px; -fx-text-fill: -cein-ink; }
+.ceinAuthValueStrong { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 14px; -fx-text-fill: -cein-ink; }
+.ceinAuthMode { -fx-font-family: 'Inter SemiBold'; -fx-font-size: 13px; -fx-text-fill: -cein-muted; }
+.ceinAuthField { -fx-pref-height: 44; }
+.ceinAuthSubmit { -fx-min-height: 44; }
+.ceinAuthScan { -fx-min-height: 44; -fx-padding: 0 24 0 24; }
+.ceinAuthBioBox {
+	-fx-min-width: 120; -fx-min-height: 120; -fx-max-width: 120; -fx-max-height: 120;
+	-fx-background-color: -cein-bg;
+	-fx-background-radius: 10;
+	-fx-border-color: transparent;
 	-fx-padding: 0;
 }
-.fingerPrintPanes:focused, .IrisPanes:focused { -fx-border-color: -cein-green; -fx-border-width: 2; }
-.ceinAuthScan { -fx-min-height: 44; }
+.photoCapturePanes, .fingerPrintPanes, .fingerPrintPanes:focused, .IrisPanes, .IrisPanes:focused, .IrisPanesSelected {
+	-fx-background-color: -cein-bg;
+	-fx-border-color: transparent;
+	-fx-border-width: 0;
+	-fx-background-radius: 10;
+	-fx-padding: 0;
+}
+.ceinAuthProgress { -fx-background-color: rgba(255,255,255,0.7); }
 
-/* ---------- acknowledgement (AckReceipt.fxml) ---------- */
+/* ---------- acknowledgement (AckReceipt.fxml, design "Confirmation") ---------- */
 .ceinAck { -fx-background-color: -cein-bg; }
-.ceinAckBar {
-	-fx-background-color: white;
-	-fx-border-color: transparent transparent -cein-line transparent;
-	-fx-border-width: 0 0 1 0;
-	-fx-padding: 16 32 16 32;
-}
+.ceinAckBody { -fx-padding: 28 32 28 32; -fx-background-color: -cein-bg; }
+.ceinAckCard { -fx-padding: 32; }
 .ceinAckCheck {
-	-fx-min-width: 40;
-	-fx-min-height: 40;
-	-fx-max-width: 40;
-	-fx-max-height: 40;
-	-fx-background-color: -cein-green;
-	-fx-background-radius: 20;
+	-fx-min-width: 48; -fx-min-height: 48; -fx-max-width: 48; -fx-max-height: 48;
+	-fx-background-color: transparent;
+	-fx-border-color: -cein-green;
+	-fx-border-width: 2;
+	-fx-border-radius: 24;
+	-fx-background-radius: 24;
 }
-.ceinAckCheckMark { -fx-fill: transparent; -fx-stroke: white; -fx-stroke-width: 2.6; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; }
-.ceinAckTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 20px; -fx-text-fill: -cein-ink; }
-.ceinAckButton { -fx-min-height: 44; -fx-padding: 0 22 0 18; }
-.ceinAckBody { -fx-padding: 24 32 24 32; -fx-background-color: -cein-bg; }
-.ceinAckPaper { -fx-padding: 8; }
+.ceinAckCheckMark { -fx-fill: transparent; -fx-stroke: -cein-green; -fx-stroke-width: 2.5; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; }
+.ceinAckTitle { -fx-font-family: 'Space Grotesk SemiBold'; -fx-font-size: 26px; -fx-text-fill: -cein-ink; }
+.ceinAckSubtitle { -fx-font-size: 15px; -fx-text-fill: -cein-muted; }
+.ceinAckDetails {
+	-fx-padding: 20 0 20 0;
+	-fx-border-color: -cein-line-soft transparent -cein-line-soft transparent;
+	-fx-border-width: 1 0 1 0;
+}
+.ceinAckTerm { -fx-font-size: 15px; -fx-text-fill: -cein-muted; }
+.ceinAckValue { -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
+.ceinAckRid { -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -cein-ink; }
+.ceinAckButton { -fx-min-height: 48; -fx-font-size: 16px; -fx-padding: 0 22 0 22; }
+.ceinAckHomeLink { -fx-text-fill: -cein-green; -fx-font-family: 'Inter SemiBold'; -fx-font-size: 16px; -fx-padding: 0 18 0 18; -fx-border-color: transparent; -fx-underline: false; }
+.ceinAckHomeLink:hover { -fx-text-fill: -cein-green-dark; -fx-underline: true; }
+.ceinAckPreview { -fx-background-color: #E3E7EA; -fx-background-radius: 12; }
+.ceinAckPreviewTitle {
+	-fx-font-family: 'Inter SemiBold';
+	-fx-font-size: 13px;
+	-fx-text-fill: -cein-ink-2;
+	-fx-padding: 12 16 12 16;
+	-fx-border-color: transparent transparent #D3D9DE transparent;
+	-fx-border-width: 0 0 1 0;
+}
+.ceinAckPreviewBody { -fx-padding: 20 0 20 0; }
+.ceinAckPaper { -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10, 0, 0, 2); }
+
+.ceinScanHalf { -fx-font-size: 14px; -fx-padding: 0 8 0 8; }

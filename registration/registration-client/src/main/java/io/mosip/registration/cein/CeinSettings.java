@@ -33,6 +33,10 @@ public final class CeinSettings {
 	public static final String RECEIPT_PRINTABLE_WIDTH_MM = "mosip.registration.cein.receipt.printable-width-mm";
 
 	/** Smallest size the operator can shrink the client window to (px). */
+	/** Demographic field ids joined to show the applicant's name on the acknowledgement screen. */
+	public static final String ACK_NAME_FIELDS = "mosip.registration.cein.ack.applicant-name-fields";
+	public static final String DEFAULT_ACK_NAME_FIELDS = "fullName,firstName,middleName,lastName";
+
 	public static final String WINDOW_MIN_WIDTH = "mosip.registration.cein.window.min-width";
 	public static final String WINDOW_MIN_HEIGHT = "mosip.registration.cein.window.min-height";
 
@@ -119,5 +123,9 @@ public final class CeinSettings {
 	public static int getReceiptPrintableWidthMm() {
 		int roll = getReceiptRollWidthMm();
 		return getInt(RECEIPT_PRINTABLE_WIDTH_MM, roll <= 58 ? 48 : 72);
+	}
+
+	public static String[] getAckNameFields() {
+		return getString(ACK_NAME_FIELDS, DEFAULT_ACK_NAME_FIELDS).split("\\s*,\\s*");
 	}
 }

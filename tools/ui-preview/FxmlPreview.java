@@ -74,6 +74,9 @@ public class FxmlPreview {
 				try {
 					FXMLLoader loader = new FXMLLoader(fxml.toUri().toURL(), bundle);
 					Parent root = loader.load();
+					if (Boolean.getBoolean("preview.demo")) {
+						root = PreviewDemo.fill(name, root, bundle, loader.getNamespace());
+					}
 					Scene scene = new Scene(root, w, h);
 					scene.getStylesheets().add(res.resolve(css).toUri().toString());
 					Stage stage = new Stage();

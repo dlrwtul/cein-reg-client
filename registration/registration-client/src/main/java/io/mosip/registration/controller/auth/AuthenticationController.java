@@ -160,6 +160,37 @@ public class AuthenticationController extends BaseController implements Initiali
 	private GridPane progressIndicatorPane;
 	@FXML
 	private ProgressIndicator progressIndicator;
+
+	// CEIN (design "AuthOperateur"): officer card, supervisor card
+	@FXML
+	private javafx.scene.layout.VBox ceinAuthOperatorCard;
+	@FXML
+	private Label ceinAuthOperatorNumber;
+	@FXML
+	private javafx.scene.shape.SVGPath ceinAuthOperatorCheck;
+	@FXML
+	private javafx.scene.layout.StackPane ceinAuthOperatorBadge;
+	@FXML
+	private Label ceinAuthOperatorStatus;
+	@FXML
+	private Label ceinAuthOperatorId;
+	@FXML
+	private Label ceinAuthOperatorName;
+	@FXML
+	private javafx.scene.layout.VBox ceinAuthPanes;
+	@FXML
+	private javafx.scene.layout.VBox ceinAuthOperatorSlot;
+	@FXML
+	private javafx.scene.layout.VBox ceinAuthSupervisorCard;
+	@FXML
+	private javafx.scene.layout.StackPane ceinAuthSupervisorBadge;
+	@FXML
+	private Label ceinAuthSupervisorStatus;
+	@FXML
+	private javafx.scene.layout.VBox ceinAuthSupervisorSlot;
+	@FXML
+	private javafx.scene.layout.HBox ceinAuthAttempts;
+	private String ceinOperatorMode;
 	@FXML
 	private Label authCounter;
 	@FXML
@@ -658,6 +689,7 @@ public class AuthenticationController extends BaseController implements Initiali
 	public void loadAuthenticationScreen(String loginMode) {
 		LOGGER.info("Loading the respective authentication screen in UI >> " + loginMode);
 		
+		updateCeinCards(loginMode);
 		errorPane.setVisible(false);
 		pwdBasedLogin.setVisible(false);
 		otpBasedLogin.setVisible(false);
@@ -840,6 +872,63 @@ public class AuthenticationController extends BaseController implements Initiali
 	public void exitWindow(ActionEvent event) {
 		Stage primaryStage = (Stage) ((Node) event.getSource()).getParent().getScene().getWindow();
 		primaryStage.close();
+	}
+
+	/**
+	 * CEIN: shows which person is being authenticated. The officer card holds the authentication
+	 * panes until the officer is authenticated; when the supervisor (reviewer) has to authenticate
+	 * because of a biometric exception, the panes move to the supervisor card.
+	 */
+	private void updateCeinCards(String loginMode) {
+		if (ceinAuthOperatorCard == null || ceinAuthPanes == null) {
+			return;
+		}
+		try {
+			ResourceBundle labels = ApplicationContext.getInstance().getApplicationLanguageLabelBundle();
+			if (SessionContext.userContext() != null) {
+				ceinAuthOperatorId.setText(SessionContext.userContext().getUserId());
+				ceinAuthOperatorName.setText(SessionContext.userContext().getName());
+			}
+			boolean supervisorRequired = getRegistrationDTOFromSession() != null
+					&& !getRegistrationDTOFromSession().getBiometricExceptions().isEmpty()
+					&& RegistrationConstants.ENABLE.equalsIgnoreCase(getValueFromApplicationContext(RegistrationConstants.REVIEWER_AUTH_CONFIG));
+			ceinAuthSupervisorCard.setVisible(supervisorRequired || isReviewer);
+			if (!isReviewer) {
+				ceinOperatorMode = loginMode;
+			}
+			javafx.scene.layout.VBox target = isReviewer ? ceinAuthSupervisorSlot : ceinAuthOperatorSlot;
+			if (ceinAuthPanes.getParent() != target) {
+				((javafx.scene.layout.Pane) ceinAuthPanes.getParent()).getChildren().remove(ceinAuthPanes);
+				target.getChildren().add(ceinAuthPanes);
+			}
+			ceinAuthOperatorCard.getStyleClass().remove("ceinAuthCurrent");
+			ceinAuthSupervisorCard.getStyleClass().remove("ceinAuthCurrent");
+			(isReviewer ? ceinAuthSupervisorCard : ceinAuthOperatorCard).getStyleClass().add("ceinAuthCurrent");
+
+			ceinAuthOperatorNumber.setVisible(!isReviewer);
+			ceinAuthOperatorCheck.setVisible(isReviewer);
+			ceinAuthOperatorCheck.setManaged(isReviewer);
+			ceinAuthOperatorBadge.getStyleClass().removeAll("ceinAuthBadgeCurrent", "ceinAuthBadgeDone");
+			ceinAuthOperatorBadge.getStyleClass().add(isReviewer ? "ceinAuthBadgeDone" : "ceinAuthBadgeCurrent");
+			ceinAuthSupervisorBadge.getStyleClass().remove("ceinAuthBadgeCurrent");
+			if (isReviewer) {
+				ceinAuthSupervisorBadge.getStyleClass().add("ceinAuthBadgeCurrent");
+			}
+			ceinAuthOperatorStatus.getStyleClass().remove("ceinAuthStatusOk");
+			if (isReviewer) {
+				String key = "ceinAuthDone_" + (ceinOperatorMode == null ? "" : ceinOperatorMode.toUpperCase());
+				ceinAuthOperatorStatus.setText(labels.containsKey(key) ? labels.getString(key) : labels.getString("ceinAuthDone"));
+				ceinAuthOperatorStatus.getStyleClass().add("ceinAuthStatusOk");
+			} else {
+				ceinAuthOperatorStatus.setText(labels.getString("ceinAuthPending"));
+			}
+			String mode = loginMode == null ? "" : loginMode.toUpperCase();
+			boolean biometric = RegistrationConstants.FINGERPRINT_UPPERCASE.equals(mode) || RegistrationConstants.IRIS.equals(mode)
+					|| RegistrationConstants.FACE.equals(mode);
+			ceinAuthAttempts.setVisible(biometric);
+		} catch (RuntimeException exception) {
+			LOGGER.error("Unable to update the authentication cards", exception);
+		}
 	}
 
 	public void initData(String authType) throws RegBaseCheckedException {

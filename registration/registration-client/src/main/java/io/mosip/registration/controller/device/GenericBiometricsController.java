@@ -179,6 +179,19 @@ public class GenericBiometricsController extends BaseController {
 	@FXML
 	private GridPane checkBoxPane;
 
+	// CEIN (design "Biometrie")
+	@FXML
+	private Label ceinBioInstruction;
+	@FXML
+	private Label ceinBioQualityTitle;
+	@FXML
+	private Label ceinBioVerdict;
+	@FXML
+	private Label ceinBioAttemptsTitle;
+	@FXML
+	private javafx.scene.layout.VBox ceinBioExceptions;
+	private int ceinMaxAttempts;
+
 	private ResourceBundle applicationLabelBundle;
 
 	private Modality currentModality;
@@ -241,6 +254,13 @@ public class GenericBiometricsController extends BaseController {
 				RegistrationConstants.LABELS);
 		setImage(scanImageView	, RegistrationConstants.SCAN_IMG);
 		setImage(closeButtonImageView	, RegistrationConstants.CLOSE_IMG);
+		if (ceinBioExceptions != null && checkBoxPane != null) {
+			// CEIN: the exceptions block is shown only for modalities that have an exception pane
+			final javafx.scene.layout.VBox exceptionsBlock = ceinBioExceptions;
+			exceptionsBlock.setVisible(!checkBoxPane.getChildren().isEmpty());
+			checkBoxPane.getChildren().addListener((javafx.collections.ListChangeListener<Node>) change ->
+					exceptionsBlock.setVisible(!change.getList().isEmpty()));
+		}
 	}
 
 	public boolean isBiometricExceptionProofCollected(String fieldId) {
@@ -274,6 +294,10 @@ public class GenericBiometricsController extends BaseController {
 
 		biometricBox.setVisible(true);
 		biometricType.setText(applicationLabelBundle.getString(modality.name()));
+		if (ceinBioInstruction != null) {
+			String key = "ceinBioHint_" + modality.name();
+			ceinBioInstruction.setText(applicationLabelBundle.containsKey(key) ? applicationLabelBundle.getString(key) : "");
+		}
 		checkBoxPane.getChildren().clear();
 
 		// get List of captured Biometrics based on nonExceptionBio Attributes
@@ -862,6 +886,7 @@ public class GenericBiometricsController extends BaseController {
 		bioProgress.setProgress(0);
 		qualityText.setText("");
 		sdkQualityText.setText("");
+		updateCeinQuality(-1, 0, null);
 
 	}
 
@@ -887,6 +912,8 @@ public class GenericBiometricsController extends BaseController {
 
 		retry = retry == 0 ? 1 : retry;
 		clearAttemptsBox(thresholdValue, retry);
+		updateCeinAttemptsTitle(retry);
+		updateCeinQuality(Double.valueOf(getQualityScoreText(qltyScore).split(RegistrationConstants.PERCENTAGE)[0]), thresholdValue, retry);
 
 		if (Double.valueOf(getQualityScoreText(qltyScore).split(RegistrationConstants.PERCENTAGE)[0]) >= thresholdValue) {
 			bioProgress.getStyleClass().removeAll(RegistrationConstants.PROGRESS_BAR_RED);
@@ -919,19 +946,21 @@ public class GenericBiometricsController extends BaseController {
 
 				LOGGER.info("Mouse Event by attempt Started");
 
-				String eventString = mouseEvent.toString();
-				int index = eventString.indexOf(RegistrationConstants.RETRY_ATTEMPT_ID);
-
-				if (index == -1) {
-					String text = "Text[text=";
-					index = eventString.indexOf(text) + text.length() + 1;
-
-				} else {
-					index = index + RegistrationConstants.RETRY_ATTEMPT_ID.length();
+				// CEIN: the attempt is found from the clicked node (its id is retryAttempt_<n>)
+				int attempt = -1;
+				Node picked = mouseEvent.getPickResult() == null ? null : mouseEvent.getPickResult().getIntersectedNode();
+				while (picked != null && picked != bioRetryBox) {
+					if (picked.getId() != null && picked.getId().startsWith(RegistrationConstants.RETRY_ATTEMPT_ID)) {
+						attempt = Integer.parseInt(picked.getId().substring(RegistrationConstants.RETRY_ATTEMPT_ID.length()));
+						break;
+					}
+					picked = picked.getParent();
+				}
+				if (attempt < 1 || attempt > bioRetryBox.getChildren().size()) {
+					return;
 				}
 				try {
 
-					int attempt = Character.getNumericValue(eventString.charAt(index));
 					for(Node node : bioRetryBox.getChildren()) {
 						node.getStyleClass().removeAll(RegistrationConstants.QUALITY_LABEL_BLUE_BORDER);
 					}
@@ -943,6 +972,7 @@ public class GenericBiometricsController extends BaseController {
 					updateByAttempt(qualityScoreVal, getBioStreamImage(fxControl.getUiSchemaDTO().getId(), currentModality, attempt),
 							bioService.getMDMQualityThreshold(currentModality), biometricImage,
 							qualityText, bioProgress);
+					updateCeinQuality(qualityScoreVal, bioService.getMDMQualityThreshold(currentModality), attempt);
 					//}
 
 					LOGGER.info("Mouse Event by attempt Ended. modality : {}", currentModality);
@@ -959,10 +989,15 @@ public class GenericBiometricsController extends BaseController {
 			label.getStyleClass().add(RegistrationConstants.QUALITY_LABEL_GREY);
 			label.setId(RegistrationConstants.RETRY_ATTEMPT_ID + (retry + 1));
 			label.setVisible(true);
-			label.setText(String.valueOf(retry + 1));
+			label.setText(attemptText(retry + 1, null));
 			label.setAlignment(Pos.CENTER);
+			label.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+			label.setMaxWidth(Double.MAX_VALUE);
+			HBox.setHgrow(label, javafx.scene.layout.Priority.ALWAYS);
 			bioRetryBox.getChildren().add(label);
 		}
+		ceinMaxAttempts = retryCount;
+		updateCeinAttemptsTitle(0);
 		bioRetryBox.setOnMouseClicked(mouseEventHandler);
 		thresholdLabel.setAlignment(Pos.CENTER);
 
@@ -970,8 +1005,10 @@ public class GenericBiometricsController extends BaseController {
 		if (getRegistrationDTOFromSession() != null && getRegistrationDTOFromSession().getSelectedLanguagesByApplicant() != null) {
 			langCode = getRegistrationDTOFromSession().getSelectedLanguagesByApplicant().get(0);
 		}
-		thresholdLabel.setText(ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS).getString("threshold").concat("  ").concat(String.valueOf(biometricThreshold))
-				.concat(RegistrationConstants.PERCENTAGE));
+		ResourceBundle thresholdLabels = ApplicationContext.getBundle(langCode, RegistrationConstants.LABELS);
+		thresholdLabel.setText(thresholdLabels.containsKey("ceinThresholdRequired")
+				? java.text.MessageFormat.format(thresholdLabels.getString("ceinThresholdRequired"), formatScore(biometricThreshold))
+				: thresholdLabels.getString("threshold").concat("  ").concat(String.valueOf(biometricThreshold)).concat(RegistrationConstants.PERCENTAGE));
 		thresholdPane1.setPercentWidth(biometricThreshold);
 		thresholdPane2.setPercentWidth(100.00 - (biometricThreshold));
 		LOGGER.info("Updated Quality and threshold values of biometrics");
@@ -988,6 +1025,9 @@ public class GenericBiometricsController extends BaseController {
 			Node node = bioRetryBox.lookup(RegistrationConstants.RETRY_ATTEMPT + retryBox);
 
 			if (node != null) {
+				if (node instanceof Label) {
+					((Label) node).setText(attemptText(retryBox, getBioScores(fxControl.getUiSchemaDTO().getId(), currentModality, retryBox)));
+				}
 				node.getStyleClass().clear();
 				node.getStyleClass().add(getBioScores(fxControl.getUiSchemaDTO().getId(), currentModality, retryBox) >= threshold ?
 						RegistrationConstants.QUALITY_LABEL_GREEN :
@@ -1003,6 +1043,9 @@ public class GenericBiometricsController extends BaseController {
 			Node node = bioRetryBox.lookup(RegistrationConstants.RETRY_ATTEMPT + retries);
 
 			if (node != null) {
+				if (node instanceof Label) {
+					((Label) node).setText(attemptText(retries, null));
+				}
 				node.getStyleClass().clear();
 				node.getStyleClass().add(RegistrationConstants.QUALITY_LABEL_GREY);
 			}
@@ -1424,6 +1467,42 @@ public class GenericBiometricsController extends BaseController {
 		this.configBioAttributes = configBioAttributes;
 		this.nonConfigBioAttributes = nonConfigBioAttributes;
 		displayBiometric(modality);
+	}
+
+	// ---------------------------------------------------------------- CEIN helpers
+
+	private static String formatScore(double score) {
+		return score == Math.rint(score) ? String.valueOf((long) score) : String.valueOf(score);
+	}
+
+	private String attemptText(int attempt, Double score) {
+		String title = java.text.MessageFormat.format(applicationLabelBundle.getString("ceinAttemptN"), attempt);
+		return title + "\n" + (score == null || score <= 0 ? "\u2014" : formatScore(Math.round(score)));
+	}
+
+	private void updateCeinAttemptsTitle(int used) {
+		if (ceinBioAttemptsTitle != null) {
+			ceinBioAttemptsTitle.setText(java.text.MessageFormat.format(applicationLabelBundle.getString("ceinAttemptsUsed"),
+					used, ceinMaxAttempts));
+		}
+	}
+
+	/** Quality title ("Quality · attempt n") and verdict against the threshold; score < 0 clears them. */
+	private void updateCeinQuality(double score, double threshold, Integer attempt) {
+		if (ceinBioQualityTitle != null) {
+			ceinBioQualityTitle.setText(attempt == null ? applicationLabelBundle.getString("quality")
+					: java.text.MessageFormat.format(applicationLabelBundle.getString("ceinQualityAttempt"), attempt));
+		}
+		if (ceinBioVerdict != null) {
+			ceinBioVerdict.getStyleClass().removeAll(RegistrationConstants.LABEL_GREEN, RegistrationConstants.LABEL_RED);
+			if (score < 0) {
+				ceinBioVerdict.setText("");
+			} else {
+				boolean ok = score >= threshold;
+				ceinBioVerdict.setText(applicationLabelBundle.getString(ok ? "ceinAboveThreshold" : "ceinBelowThreshold"));
+				ceinBioVerdict.getStyleClass().add(ok ? RegistrationConstants.LABEL_GREEN : RegistrationConstants.LABEL_RED);
+			}
+		}
 	}
 
 	/**

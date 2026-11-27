@@ -72,6 +72,20 @@ public class AckReceiptController extends BaseController implements Initializabl
 	@Autowired
 	private SendNotificationController sendNotificationController;
 
+	// CEIN (design "Confirmation")
+	@FXML
+	private javafx.scene.control.Label ceinAckRid;
+	@FXML
+	private javafx.scene.control.Label ceinAckApplicant;
+	@FXML
+	private javafx.scene.control.Label ceinAckApplicantTerm;
+	@FXML
+	private javafx.scene.control.Label ceinAckPrintNote;
+	@FXML
+	private javafx.scene.control.Label ceinAckPreviewTitle;
+	@FXML
+	private javafx.scene.layout.StackPane ceinAckPaper;
+
 	public void setStringWriter(Writer stringWriter) {
 		this.stringWriter = stringWriter;
 	}
@@ -93,6 +107,8 @@ public class AckReceiptController extends BaseController implements Initializabl
 		 * sendNotification.setVisible(false); } else {
 		 * sendNotification.setVisible(false); }
 		 */
+
+		fillCeinDetails();
 
 		WebEngine engine = webView.getEngine();
 		// loads the generated HTML template content into webview
@@ -156,8 +172,75 @@ public class AckReceiptController extends BaseController implements Initializabl
 		LOGGER.info("REGISTRATION - UI - ACK_RECEIPT_CONTROLLER", RegistrationConstants.APPLICATION_NAME,
 				RegistrationConstants.APPLICATION_ID, "Going to New Registration Page after packet creation");
 
+		// CEIN: a new registration of the same process starts right away (MOSIP went back home)
+		String processId = getRegistrationDTOFromSession() != null ? getRegistrationDTOFromSession().getProcessId() : null;
 		clearRegistrationData();
 		goToHomePageFromRegistration();
+		if (processId != null) {
+			packetController.startRegistrationProcess(processId);
+		}
+	}
+
+	/** CEIN: "Back to home" link of the confirmation screen. */
+	@FXML
+	public void goToHome(ActionEvent event) {
+		clearRegistrationData();
+		goToHomePageFromRegistration();
+	}
+
+	/** CEIN: registration number, applicant name, printer note and receipt preview width. */
+	private void fillCeinDetails() {
+		try {
+			ResourceBundle labels = applicationContext.getApplicationLanguageLabelBundle();
+			io.mosip.registration.dto.RegistrationDTO registration = getRegistrationDTOFromSession();
+			if (ceinAckRid != null) {
+				ceinAckRid.setText(registration != null && registration.getRegistrationId() != null ? registration.getRegistrationId() : "");
+			}
+			String applicant = registration == null ? "" : applicantName(registration);
+			if (ceinAckApplicant != null) {
+				ceinAckApplicant.setText(applicant);
+				ceinAckApplicant.setVisible(!applicant.isEmpty());
+				ceinAckApplicantTerm.setVisible(!applicant.isEmpty());
+			}
+			int roll = CeinSettings.getReceiptRollWidthMm();
+			String format = roll > 0 ? roll + " mm" : "A4";
+			if (ceinAckPrintNote != null) {
+				ceinAckPrintNote.setText(java.text.MessageFormat.format(labels.getString(roll > 0 ? "ceinAckPrintNoteRoll" : "ceinAckPrintNoteA4"), roll));
+			}
+			if (ceinAckPreviewTitle != null) {
+				ceinAckPreviewTitle.setText(labels.getString("ceinAckPreview") + " \u00B7 " + format);
+			}
+			if (ceinAckPaper != null) {
+				double width = roll <= 0 ? Double.MAX_VALUE : (roll <= 58 ? 219 : 302);
+				ceinAckPaper.setPrefWidth(roll <= 0 ? javafx.scene.layout.Region.USE_COMPUTED_SIZE : width);
+				ceinAckPaper.setMaxWidth(width);
+			}
+		} catch (RuntimeException exception) {
+			LOGGER.error("Unable to fill the acknowledgement details", exception);
+		}
+	}
+
+	private String applicantName(io.mosip.registration.dto.RegistrationDTO registration) {
+		StringBuilder name = new StringBuilder();
+		for (String field : CeinSettings.getAckNameFields()) {
+			Object value = registration.getDemographics().get(field);
+			String text = null;
+			if (value instanceof String) {
+				text = (String) value;
+			} else if (value instanceof java.util.List && !((java.util.List<?>) value).isEmpty()) {
+				Object first = ((java.util.List<?>) value).get(0);
+				try {
+					Object v = first.getClass().getMethod("getValue").invoke(first);
+					text = v == null ? null : v.toString();
+				} catch (ReflectiveOperationException exception) {
+					text = null;
+				}
+			}
+			if (text != null && !text.isBlank()) {
+				name.append(name.length() > 0 ? " " : "").append(text.trim());
+			}
+		}
+		return name.toString();
 	}
 
 	/**

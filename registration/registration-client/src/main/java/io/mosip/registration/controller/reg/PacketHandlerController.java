@@ -879,7 +879,16 @@ public class PacketHandlerController extends BaseController implements Initializ
 	}
 	
 	public void selectLanguage(MouseEvent event) {
-		if (!proceedOnRegistrationAction())
+		startRegistrationProcess(((GridPane) event.getSource()).getId());
+	}
+
+	/**
+	 * CEIN: starts a registration of the given process (same checks and language handling as a
+	 * click on the process tile); used by the tiles and by "New registration" on the
+	 * acknowledgement screen.
+	 */
+	public void startRegistrationProcess(String processId) {
+		if (processId == null || !proceedOnRegistrationAction())
 			return;
 
 		StringBuilder errorMessage = new StringBuilder();
@@ -894,7 +903,6 @@ public class PacketHandlerController extends BaseController implements Initializ
 			}
 			generateAlert(RegistrationConstants.ERROR, errorMessage.toString().trim());
 		} else {
-			String processId = ((GridPane) event.getSource()).getId();
 			try {
 				languageSelectionController.setProcessId(processId);
 				String forcedLang = CeinSettings.getUsableForcedLanguage(RegistrationConstants.LABELS);

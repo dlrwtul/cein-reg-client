@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -14,54 +14,71 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 
 <!-- CEIN: biometric capture window, used when the UI spec field has fieldLayout "compact"
-     (GenericBiometricsController.init). Same capture panel as BiometricsCapture.fxml, with a
-     window header and a close button. -->
+     (GenericBiometricsController.init). Same capture panel as BiometricsCapture.fxml (design
+     "Biometrie") with a window header and a close button. -->
 <VBox styleClass="scanPage, ceinBioWindow" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="io.mosip.registration.controller.device.GenericBiometricsController">
   <children>
-    <HBox fx:id="gheaderfooter" alignment="CENTER_LEFT" styleClass="ceinWindowHeader">
+    <HBox fx:id="gheaderfooter" alignment="CENTER_LEFT" styleClass="ceinDialogHeader">
       <children>
-        <Label styleClass="ceinWindowTitle" text="%ceinBioWindowTitle" />
-        <Region HBox.hgrow="ALWAYS" />
-        <GridPane fx:id="trackerGrid" />
-        <Hyperlink fx:id="closeButton" onAction="#exitWindow" styleClass="exit, ceinWindowClose">
+        <Label styleClass="ceinDialogTitle" text="%ceinBioWindowTitle" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+        <Hyperlink fx:id="closeButton" onAction="#exitWindow" styleClass="ceinIconButton">
           <graphic>
-            <ImageView fx:id="closeButtonImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images/DocumentClose.png" /></image>
-            </ImageView>
+            <StackPane>
+              <children>
+                <ImageView fx:id="closeButtonImageView" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
+                <SVGPath content="M6 6 L18 18 M18 6 L6 18" styleClass="ceinIconStroke" />
+              </children>
+            </StackPane>
           </graphic>
         </Hyperlink>
       </children>
     </HBox>
-    <GridPane fx:id="biometric" hgap="16.0" styleClass="ceinBioCapture, ceinBioWindowBody" VBox.vgrow="ALWAYS">
-      <columnConstraints>
-        <ColumnConstraints hgrow="ALWAYS" minWidth="380.0" />
-        <ColumnConstraints minWidth="220.0" prefWidth="250.0" />
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints valignment="TOP" />
-      </rowConstraints>
-      <children>
-
-        <!-- capture -->
-        <VBox spacing="16.0" styleClass="ceinCard, ceinBioCard">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="ceinFormScroll" VBox.vgrow="ALWAYS">
+      <content>
+        <GridPane fx:id="biometric" styleClass="ceinBioCapture, ceinBioWindowBody" VBox.vgrow="ALWAYS">
+          <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" />
+          </columnConstraints>
           <children>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
+          <VBox spacing="20.0" styleClass="ceinCard, ceinBioCard">
+          <children>
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
               <children>
-                <Label fx:id="biometricType" styleClass="biometricTypeLabel, ceinBioTitle" />
-                <Region HBox.hgrow="ALWAYS" />
-                <Label fx:id="captureTimeValue" styleClass="qualityBoxLabel, ceinMuted" text="" />
+                <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                  <children>
+                    <Label fx:id="biometricType" styleClass="biometricTypeLabel, ceinBioTitle" />
+                    <Label fx:id="ceinBioInstruction" styleClass="ceinBioInstruction" wrapText="true" />
+                  </children>
+                </VBox>
+                <Button fx:id="scanBtn" graphicTextGap="8.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#scan" styleClass="onboardScanBtn, ceinBioScan" text="%scan">
+                  <graphic>
+                    <StackPane>
+                      <children>
+                        <ImageView fx:id="scanImageView" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
+                        <SVGPath content="M12 11v2.5c0 3-1 5.5-2.5 7.5M8 5.6A7 7 0 0 1 19 11v2M5 9a7 7 0 0 0-.4 2.3v2M15.5 13c0 3-.6 5.5-1.8 7.6M8.6 11a3.5 3.5 0 0 1 6.9 0" styleClass="ceinIconStroke, ceinIconOnPrimary" />
+                      </children>
+                    </StackPane>
+                  </graphic>
+                </Button>
               </children>
             </HBox>
 
-            <GridPane fx:id="biometricBox" alignment="CENTER" hgap="16.0">
+            <GridPane hgap="24.0">
               <columnConstraints>
-                <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="280.0" percentWidth="50.0" />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="280.0" percentWidth="50.0" />
               </columnConstraints>
+              <rowConstraints>
+                <RowConstraints valignment="TOP" />
+              </rowConstraints>
               <children>
-                <GridPane fx:id="biometricPane" maxHeight="230.0" maxWidth="230.0" minHeight="230.0" minWidth="230.0" prefHeight="230.0" prefWidth="230.0" styleClass="biometricPaneSelected">
+
+                <!-- captured image -->
+                <GridPane fx:id="biometricBox" alignment="CENTER" minHeight="320.0" styleClass="ceinBioStage">
                   <columnConstraints>
                     <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
                   </columnConstraints>
@@ -69,101 +86,111 @@
                     <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
                   </rowConstraints>
                   <children>
-                    <ImageView fx:id="biometricImage" fitHeight="214.0" fitWidth="214.0" pickOnBounds="true" preserveRatio="true" />
+                    <GridPane fx:id="biometricPane" maxHeight="270.0" maxWidth="270.0" minHeight="270.0" minWidth="270.0" prefHeight="270.0" prefWidth="270.0" styleClass="biometricPaneSelected">
+                      <columnConstraints>
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
+                      </columnConstraints>
+                      <rowConstraints>
+                        <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
+                      </rowConstraints>
+                      <children>
+                        <ImageView fx:id="biometricImage" fitHeight="250.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" />
+                      </children>
+                    </GridPane>
                   </children>
                 </GridPane>
-              </children>
-            </GridPane>
 
-            <HBox alignment="CENTER" spacing="12.0">
-              <children>
-                <Button fx:id="scanBtn" graphicTextGap="10.0" mnemonicParsing="false" onAction="#scan" styleClass="onboardScanBtn, ceinBioScan" text="%scan">
-                  <graphic>
-                    <ImageView fx:id="scanImageView" managed="false" visible="false" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-                      <image><Image url="@../images_cein/scan.png" /></image>
-                    </ImageView>
-                  </graphic>
-                </Button>
-              </children>
-            </HBox>
-
-            <!-- quality against the threshold, and the attempts (click an attempt to show it) -->
-            <GridPane fx:id="retryBox" hgap="14.0" styleClass="ceinBioMeasures" vgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints minWidth="90.0" />
-                <ColumnConstraints hgrow="ALWAYS" />
-                <ColumnConstraints minWidth="56.0" halignment="RIGHT" />
-              </columnConstraints>
-              <children>
-                <GridPane fx:id="parentProgressPane" hgap="14.0" vgap="10.0" GridPane.columnSpan="3">
-                  <columnConstraints>
-                    <ColumnConstraints minWidth="90.0" />
-                    <ColumnConstraints hgrow="ALWAYS" />
-                    <ColumnConstraints minWidth="56.0" halignment="RIGHT" />
-                  </columnConstraints>
+                <VBox spacing="22.0" GridPane.columnIndex="1">
                   <children>
-                    <Label fx:id="thresholdLabel" maxWidth="Infinity" styleClass="ceinBioThreshold" text="%threshold" GridPane.columnIndex="1" />
-
-                    <Label styleClass="qualityLabel, ceinBioMeasureLabel" text="%quality" GridPane.rowIndex="1" />
-                    <StackPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <!-- quality and attempts -->
+                    <GridPane fx:id="retryBox">
+                      <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" />
+                      </columnConstraints>
                       <children>
-                        <ProgressBar fx:id="bioProgress" maxWidth="Infinity" progress="0.0" styleClass="ceinBioProgress" />
-                        <GridPane mouseTransparent="true">
+                        <GridPane fx:id="parentProgressPane" vgap="10.0">
                           <columnConstraints>
-                            <ColumnConstraints fx:id="thresholdPane1" percentWidth="10.0" />
-                            <ColumnConstraints fx:id="thresholdPane2" percentWidth="90.0" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                            <ColumnConstraints halignment="RIGHT" />
                           </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints vgrow="ALWAYS" />
-                          </rowConstraints>
                           <children>
-                            <AnchorPane fx:id="thresholdBar" minHeight="18.0" />
+                            <Label fx:id="ceinBioQualityTitle" styleClass="ceinFieldLabel" text="%quality" />
+                            <Label fx:id="qualityText" styleClass="ceinBioQualityValue" GridPane.columnIndex="1" />
+
+                            <StackPane GridPane.columnSpan="2" GridPane.rowIndex="1">
+                              <children>
+                                <ProgressBar fx:id="bioProgress" maxWidth="Infinity" progress="0.0" styleClass="ceinBioProgress" />
+                                <GridPane mouseTransparent="true">
+                                  <columnConstraints>
+                                    <ColumnConstraints fx:id="thresholdPane1" percentWidth="60.0" />
+                                    <ColumnConstraints fx:id="thresholdPane2" percentWidth="40.0" />
+                                  </columnConstraints>
+                                  <rowConstraints>
+                                    <RowConstraints vgrow="ALWAYS" />
+                                  </rowConstraints>
+                                  <children>
+                                    <AnchorPane fx:id="thresholdBar" minHeight="18.0" />
+                                  </children>
+                                </GridPane>
+                              </children>
+                            </StackPane>
+
+                            <Label fx:id="thresholdLabel" styleClass="ceinMuted" text="%threshold" GridPane.rowIndex="2" />
+                            <Label fx:id="ceinBioVerdict" styleClass="ceinBioVerdict" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                            <VBox spacing="10.0" styleClass="ceinBioAttemptsBlock" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                              <children>
+                                <Label fx:id="ceinBioAttemptsTitle" styleClass="attemptsLabel, ceinFieldLabel" text="%attempts" />
+                                <HBox fx:id="bioRetryBox" spacing="8.0" styleClass="ceinBioAttempts" />
+                                <Label styleClass="ceinBioHint" text="%ceinAttemptsHint" wrapText="true" />
+                              </children>
+                            </VBox>
                           </children>
                         </GridPane>
                       </children>
-                    </StackPane>
-                    <Label fx:id="qualityText" alignment="CENTER_RIGHT" minWidth="56.0" styleClass="ceinBioQualityValue" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                    </GridPane>
 
-                    <Label styleClass="attemptsLabel, ceinBioMeasureLabel" text="%attempts" GridPane.rowIndex="2" />
-                    <HBox fx:id="bioRetryBox" alignment="CENTER_LEFT" spacing="10.0" styleClass="ceinBioAttempts" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                    <!-- exceptions (missing / injured fingers, eyes) -->
+                    <VBox fx:id="ceinBioExceptions" managed="${ceinBioExceptions.visible}" spacing="8.0">
+                      <children>
+                        <GridPane fx:id="checkBoxPane">
+                          <columnConstraints>
+                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints valignment="TOP" />
+                          </rowConstraints>
+                        </GridPane>
+                        <Label styleClass="ceinBioHint" text="%ceinExceptionsHint" wrapText="true" />
+                      </children>
+                    </VBox>
+                    <Label fx:id="photoAlert" maxWidth="Infinity" styleClass="photoAlert" wrapText="true" />
+
+                    <!-- device (MDS) and SDK scores, shown when the SDK quality check is enabled; capture time -->
+                    <GridPane fx:id="thresholdBox" hgap="12.0" managed="${thresholdBox.visible}" styleClass="ceinBioScores" vgap="6.0">
+                      <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                      </columnConstraints>
+                      <children>
+                        <Label styleClass="mdsQualityLabel, ceinBioMeasureLabel" text="%mdsQuality" />
+                        <Label fx:id="qualityScore" styleClass="ceinBioScoreValue" GridPane.columnIndex="1" />
+                        <Label styleClass="sdkQualityLabel, ceinBioMeasureLabel" text="%sdkQuality" GridPane.columnIndex="2" />
+                        <Label fx:id="sdkQualityText" styleClass="sdkQualityText, ceinBioScoreValue" GridPane.columnIndex="3" />
+                      </children>
+                    </GridPane>
+                    <Label fx:id="captureTimeValue" styleClass="qualityBoxLabel, ceinMuted" text="" />
                   </children>
-                </GridPane>
-              </children>
-            </GridPane>
-
-            <!-- device (MDS) and SDK quality scores, shown when the SDK quality check is enabled -->
-            <GridPane fx:id="thresholdBox" hgap="14.0" managed="${thresholdBox.visible}" styleClass="ceinBioScores" vgap="6.0">
-              <columnConstraints>
-                <ColumnConstraints />
-                <ColumnConstraints hgrow="ALWAYS" />
-                <ColumnConstraints />
-                <ColumnConstraints hgrow="ALWAYS" />
-              </columnConstraints>
-              <children>
-                <Label styleClass="mdsQualityLabel, ceinBioMeasureLabel" text="%mdsQuality" />
-                <Label fx:id="qualityScore" styleClass="ceinBioScoreValue" GridPane.columnIndex="1" />
-                <Label styleClass="sdkQualityLabel, ceinBioMeasureLabel" text="%sdkQuality" GridPane.columnIndex="2" />
-                <Label fx:id="sdkQualityText" styleClass="sdkQualityText, ceinBioScoreValue" GridPane.columnIndex="3" />
+                </VBox>
               </children>
             </GridPane>
           </children>
-        </VBox>
-
-        <!-- exceptions (missing / unusable fingers, eyes) and alerts -->
-        <VBox spacing="12.0" styleClass="ceinCard, ceinBioSide" GridPane.columnIndex="1">
-          <children>
-            <GridPane fx:id="checkBoxPane">
-              <columnConstraints>
-                <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints valignment="TOP" />
-              </rowConstraints>
-            </GridPane>
-            <Label fx:id="photoAlert" maxWidth="Infinity" styleClass="photoAlert" wrapText="true" />
+          </VBox>
           </children>
-        </VBox>
-      </children>
-    </GridPane>
+        </GridPane>
+      </content>
+    </ScrollPane>
   </children>
 </VBox>

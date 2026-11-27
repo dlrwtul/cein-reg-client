@@ -137,6 +137,21 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 	@FXML
 	private Text scanningMsg;
 
+	// CEIN: design "Scan" - header, thumbnails, zoom and source list
+	@FXML
+	private Label ceinScanTitle;
+	@FXML
+	private Label ceinScanSubtitle;
+	@FXML
+	private Label ceinScanHint;
+	@FXML
+	private javafx.scene.layout.HBox ceinThumbs;
+	@FXML
+	private javafx.scene.control.Slider ceinZoom;
+	@FXML
+	private javafx.scene.control.ComboBox<String> ceinSource;
+	private javafx.scene.control.Slider boundZoomSlider;
+
 	@Value("${mosip.doc.stage.width:1200}")
 	private int width;
 
@@ -207,6 +222,93 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		boolean browseEnabled = CeinSettings.isDocBrowseEnabled();
 		browseBtn.setVisible(browseEnabled);
 		browseBtn.setManaged(browseEnabled);
+		initCeinDesign(browseEnabled);
+	}
+
+	/** CEIN: wires the controls of the "Scan" design to the MOSIP behaviour of this window. */
+	private void initCeinDesign(boolean browseEnabled) {
+		ResourceBundle labels = applicationContext.getApplicationLanguageLabelBundle();
+		if (ceinScanHint != null) {
+			ceinScanHint.setText(MessageFormat.format(labels.getString("ceinScanHint"),
+					Math.max(1, CeinSettings.getDocBrowseMaxSizeBytes() / (1024 * 1024))));
+			ceinScanHint.setVisible(browseEnabled);
+			ceinScanHint.setManaged(browseEnabled);
+		}
+		if (ceinZoom != null) {
+			if (boundZoomSlider != null) {
+				boundZoomSlider.valueProperty().unbindBidirectional(zoomProperty);
+			}
+			ceinZoom.valueProperty().bindBidirectional(zoomProperty);
+			boundZoomSlider = ceinZoom;
+		}
+		if (ceinSource != null) {
+			// scanner: one capture per click; camera: live view, the click captures the current frame
+			ceinSource.getItems().setAll(labels.getString("ceinScanSourceScanner"), labels.getString("ceinScanSourceCamera"));
+			ceinSource.getSelectionModel().select(0);
+			ceinSource.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+				if (newValue != null && newValue.intValue() == 1) {
+					stream();
+				} else {
+					setWebCamStream(false);
+					isStreamPaused = true;
+				}
+			});
+		}
+		InvalidationListener pagesChanged = o -> refreshCeinPages();
+		docCurrentPageNumber.textProperty().addListener(pagesChanged);
+		totalScannedPages.textProperty().addListener(pagesChanged);
+	}
+
+	/** CEIN: page count in the header and one thumbnail per page (click = select the page). */
+	private void refreshCeinPages() {
+		if (ceinThumbs == null) {
+			return;
+		}
+		ResourceBundle labels = applicationContext.getApplicationLanguageLabelBundle();
+		List<BufferedImage> pages = documentScanController.getScannedPages();
+		int total = pages == null ? 0 : pages.size();
+		int current = 0;
+		try {
+			current = Integer.parseInt(docCurrentPageNumber.getText());
+		} catch (NumberFormatException exception) {
+			current = 0;
+		}
+		if (ceinScanSubtitle != null) {
+			ceinScanSubtitle.setText(total == 0 ? labels.getString("ceinScanNoPage")
+					: MessageFormat.format(labels.getString("ceinScanPageCount"), total, Math.max(1, Math.min(current, total))));
+		}
+		ceinThumbs.getChildren().clear();
+		for (int i = 0; i < total; i++) {
+			final int index = i;
+			ImageView thumb = new ImageView(getImage(pages.get(i)));
+			thumb.setPreserveRatio(true);
+			thumb.setFitHeight(54);
+			thumb.setFitWidth(44);
+			Label number = new Label(String.valueOf(i + 1));
+			number.getStyleClass().add("ceinScanThumbNumber");
+			javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(2, thumb, number);
+			box.setAlignment(javafx.geometry.Pos.BOTTOM_CENTER);
+			box.getStyleClass().add("ceinScanThumb");
+			if (i + 1 == current) {
+				box.getStyleClass().add("ceinScanThumbSelected");
+			}
+			box.setOnMouseClicked(event -> showCeinPage(index));
+			ceinThumbs.getChildren().add(box);
+		}
+	}
+
+	private void showCeinPage(int index) {
+		List<BufferedImage> pages = documentScanController.getScannedPages();
+		if (pages == null || index < 0 || index >= pages.size()) {
+			return;
+		}
+		setWebCamStream(false);
+		clearSelection();
+		showPreview(true);
+		getImageGroup().getChildren().clear();
+		getImageGroup().getChildren().add(new ImageView(getImage(pages.get(index))));
+		initializeDocPages(index + 1, pages.size());
+		refreshCeinPages();
 	}
 
 	private void initializeDocPages(int currentPage, int totalPages) {
@@ -235,6 +337,10 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 			Parent scanPopup = BaseController.load(getClass().getResource(RegistrationConstants.SCAN_PAGE));
 			scanImage.setPreserveRatio(true);
 			//popupTitle.setText(title);
+			if (ceinScanTitle != null) {
+				ceinScanTitle.setText(title);
+			}
+			refreshCeinPages();
 			cropButton.setDisable(true);
 			cancelBtn.setDisable(true);
 			previewOption.setVisible(false);
@@ -660,6 +766,7 @@ public class ScanPopUpViewController extends BaseController implements Initializ
 		getImageGroup().getChildren().clear();
 		getImageGroup().getChildren().add(new ImageView(DocScannerUtil.getImage(bufferedImage)));
 		getScanningMsg().setVisible(false);
+		refreshCeinPages();
 		generateAlert(RegistrationConstants.ALERT_INFORMATION, RegistrationUIConstants.getMessageLanguageSpecific(RegistrationUIConstants.CROP_DOC_SUCCESS));
 		LOGGER.debug("Saving cropped image completed");
 	}

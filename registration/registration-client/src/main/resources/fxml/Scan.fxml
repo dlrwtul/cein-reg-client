@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -15,132 +14,200 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Text?>
 
-<!-- CEIN: document scan window. Preview on the left (grows with the window), actions on
-     the right in a fixed-width column so that labels are never truncated. Every fx:id and
-     handler used by ScanPopUpViewController is kept. -->
-<GridPane styleClass="scanPage, ceinScan" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
+<!-- CEIN: document scan window (design "Scan"): header with the document title and page count,
+     preview with page thumbnails and zoom, side panel (source, add a page, selected page),
+     footer Cancel / Save the document. Every fx:id and handler used by ScanPopUpViewController
+     is kept; MOSIP buttons without a place in the design (stream, preview, page arrows) stay in
+     the scene graph, hidden, and are driven by the source list and the thumbnails. -->
+<VBox styleClass="scanPage, ceinScan" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="io.mosip.registration.controller.device.ScanPopUpViewController">
-  <columnConstraints>
-    <ColumnConstraints hgrow="ALWAYS" minWidth="300.0" />
-    <ColumnConstraints minWidth="260.0" prefWidth="270.0" />
-  </columnConstraints>
-  <rowConstraints>
-    <RowConstraints vgrow="ALWAYS" />
-  </rowConstraints>
   <children>
 
-    <!-- preview -->
-    <VBox spacing="10.0" styleClass="ceinScanPreviewColumn">
+    <!-- header -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="ceinDialogHeader">
       <children>
-        <GridPane fx:id="imageViewGridPane" styleClass="docPreviewImgViewPane, ceinScanPreview" VBox.vgrow="ALWAYS">
-          <columnConstraints>
-            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
-          </columnConstraints>
-          <rowConstraints>
-            <RowConstraints vgrow="ALWAYS" />
-          </rowConstraints>
+        <VBox alignment="CENTER_LEFT" spacing="2.0" HBox.hgrow="ALWAYS">
           <children>
-            <ScrollPane fx:id="docPreviewScrollPane" fitToHeight="false" fitToWidth="false" styleClass="ceinScanScroll">
-              <content>
-                <StackPane fx:id="groupStackPane" alignment="CENTER">
-                  <children>
-                    <Group fx:id="imageGroup">
+            <Label fx:id="ceinScanTitle" styleClass="ceinDialogTitle" />
+            <Label fx:id="ceinScanSubtitle" styleClass="ceinMuted" />
+          </children>
+        </VBox>
+        <Button mnemonicParsing="false" onAction="#exitWindow" styleClass="ceinIconButton">
+          <graphic>
+            <SVGPath content="M6 6 L18 18 M18 6 L6 18" styleClass="ceinIconStroke" />
+          </graphic>
+        </Button>
+      </children>
+    </HBox>
+
+    <GridPane VBox.vgrow="ALWAYS">
+      <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" minWidth="300.0" />
+        <ColumnConstraints maxWidth="300.0" minWidth="260.0" prefWidth="300.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints vgrow="ALWAYS" />
+      </rowConstraints>
+      <children>
+
+        <!-- preview -->
+        <VBox styleClass="ceinScanPreviewColumn">
+          <children>
+            <GridPane fx:id="imageViewGridPane" styleClass="ceinScanPreview" VBox.vgrow="ALWAYS">
+              <columnConstraints>
+                <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
+              </rowConstraints>
+              <children>
+                <ScrollPane fx:id="docPreviewScrollPane" fitToHeight="true" fitToWidth="true" styleClass="ceinScanScroll">
+                  <content>
+                    <StackPane fx:id="groupStackPane" alignment="CENTER">
                       <children>
-                        <ImageView fx:id="scanImage" pickOnBounds="true" preserveRatio="true" />
+                        <Group fx:id="imageGroup">
+                          <children>
+                            <ImageView fx:id="scanImage" pickOnBounds="true" preserveRatio="true" />
+                          </children>
+                        </Group>
                       </children>
-                    </Group>
+                    </StackPane>
+                  </content>
+                </ScrollPane>
+              </children>
+            </GridPane>
+
+            <!-- thumbnails (one per page, built by the controller) and zoom -->
+            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="ceinScanStrip">
+              <children>
+                <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" styleClass="ceinScanThumbScroll" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
+                  <content>
+                    <HBox fx:id="ceinThumbs" alignment="CENTER_LEFT" spacing="12.0" styleClass="ceinScanThumbs" />
+                  </content>
+                </ScrollPane>
+                <Label styleClass="ceinMuted" text="%ceinZoom" />
+                <Slider fx:id="ceinZoom" max="600.0" min="50.0" prefWidth="160.0" value="200.0" />
+              </children>
+            </HBox>
+
+            <!-- MOSIP controls replaced by the source list and the thumbnails -->
+            <VBox managed="false" visible="false">
+              <children>
+                <GridPane fx:id="previewOption" visible="false">
+                  <children>
+                    <Label fx:id="docPreviewPrev" onMouseClicked="#previewPrevPage" text="%previewprevious" />
+                    <Text fx:id="docCurrentPageNumber" text="0" GridPane.columnIndex="1" />
+                    <Text fx:id="totalScannedPages" text="0" GridPane.columnIndex="2" />
+                    <Label fx:id="docPreviewNext" onMouseClicked="#previewNextPage" text="%previewnext" GridPane.columnIndex="3" />
                   </children>
-                </StackPane>
-              </content>
-            </ScrollPane>
+                </GridPane>
+                <Button fx:id="streamBtn" mnemonicParsing="false" onAction="#stream" text="%stream">
+                  <graphic>
+                    <ImageView fx:id="streamImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
+                  </graphic>
+                </Button>
+                <Button fx:id="previewBtn" mnemonicParsing="false" onAction="#preview" text="%view">
+                  <graphic>
+                    <ImageView fx:id="previewImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
+                  </graphic>
+                </Button>
+              </children>
+            </VBox>
           </children>
-        </GridPane>
+        </VBox>
 
-        <!-- page navigation, shown by the controller in preview mode -->
-        <GridPane fx:id="previewOption" alignment="CENTER" hgap="10.0" managed="${previewOption.visible}" styleClass="ceinScanPager" visible="false">
-          <columnConstraints>
-            <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" />
-            <ColumnConstraints halignment="CENTER" />
-            <ColumnConstraints halignment="CENTER" />
-            <ColumnConstraints halignment="CENTER" />
-            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
-          </columnConstraints>
+        <!-- side panel -->
+        <VBox spacing="20.0" styleClass="ceinScanSide" GridPane.columnIndex="1">
           <children>
-            <Label fx:id="docPreviewPrev" onMouseClicked="#previewPrevPage" styleClass="ceinLink" text="%previewprevious" />
-            <Text fx:id="docCurrentPageNumber" styleClass="ceinScanPageNo" text="0" GridPane.columnIndex="1" />
-            <Text styleClass="ceinScanPageNo" text="/" GridPane.columnIndex="2" />
-            <Text fx:id="totalScannedPages" styleClass="ceinScanPageNo" text="0" GridPane.columnIndex="3" />
-            <Label fx:id="docPreviewNext" onMouseClicked="#previewNextPage" styleClass="ceinLink" text="%previewnext" GridPane.columnIndex="4" />
+            <VBox spacing="6.0">
+              <children>
+                <Label styleClass="ceinFieldLabel" text="%ceinScanSource" />
+                <ComboBox fx:id="ceinSource" maxWidth="Infinity" styleClass="ceinScanSource" />
+              </children>
+            </VBox>
+
+            <VBox spacing="10.0">
+              <children>
+                <Label styleClass="ceinOverline" text="%ceinScanAddPage" />
+                <Button fx:id="captureBtn" graphicTextGap="8.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#scan" styleClass="contiuneButton, ceinScanFull" text="%ceinScanCapture">
+                  <graphic>
+                    <StackPane>
+                      <children>
+                        <ImageView fx:id="captureImageView" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
+                        <SVGPath content="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16" styleClass="ceinIconStroke, ceinIconOnPrimary" />
+                      </children>
+                    </StackPane>
+                  </graphic>
+                </Button>
+                <!-- CEIN: load a document from disk (PDF / image) -->
+                <Button fx:id="browseBtn" graphicTextGap="8.0" managed="${browseBtn.visible}" maxWidth="Infinity" mnemonicParsing="false" onAction="#browseFile" styleClass="ceinSecondary, ceinScanFull" text="%ceinScanBrowse">
+                  <graphic>
+                    <StackPane>
+                      <children>
+                        <ImageView fx:id="browseImageView" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
+                        <SVGPath content="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4" styleClass="ceinIconStroke" />
+                      </children>
+                    </StackPane>
+                  </graphic>
+                </Button>
+                <Label fx:id="ceinScanHint" styleClass="ceinMuted" wrapText="true" />
+              </children>
+            </VBox>
+
+            <VBox spacing="10.0">
+              <children>
+                <Label styleClass="ceinOverline" text="%ceinScanSelectedPage" />
+                <GridPane hgap="10.0">
+                  <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" />
+                    <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" />
+                  </columnConstraints>
+                  <children>
+                    <Button fx:id="cropButton" graphicTextGap="6.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#crop" styleClass="ceinSecondary, ceinScanFull, ceinScanHalf" text="%crop">
+                      <graphic>
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="backImageView1" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
+                            <SVGPath content="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2" styleClass="ceinIconStroke" />
+                          </children>
+                        </StackPane>
+                      </graphic>
+                    </Button>
+                    <Button fx:id="cancelBtn" graphicTextGap="6.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancel" styleClass="ceinDanger, ceinScanFull, ceinScanHalf" text="%ceinDeletePage" GridPane.columnIndex="1">
+                      <graphic>
+                        <StackPane>
+                          <children>
+                            <ImageView fx:id="cancelImageView" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
+                            <SVGPath content="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" styleClass="ceinIconStroke, ceinIconDanger" />
+                          </children>
+                        </StackPane>
+                      </graphic>
+                    </Button>
+                  </children>
+                </GridPane>
+              </children>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+            <Text fx:id="scanningMsg" styleClass="ceinScanMessage" wrappingWidth="250.0" />
           </children>
-        </GridPane>
+        </VBox>
       </children>
-    </VBox>
+    </GridPane>
 
-    <!-- actions -->
-    <VBox spacing="10.0" styleClass="ceinScanActions" GridPane.columnIndex="1">
+    <!-- footer -->
+    <HBox alignment="CENTER_RIGHT" spacing="12.0" styleClass="ceinDialogFooter">
       <children>
-        <Label styleClass="ceinEyebrow" text="%ceinScanAcquire" />
-        <Button fx:id="streamBtn" graphicTextGap="10.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#stream" styleClass="scanButton, ceinScanAction" text="%stream">
+        <Button mnemonicParsing="false" onAction="#exitWindow" styleClass="ceinSecondary" text="%cancel" />
+        <Button fx:id="saveBtn" mnemonicParsing="false" onAction="#save" styleClass="contiuneButton" text="%ceinSaveDocument">
           <graphic>
-            <ImageView fx:id="streamImageView" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/stream.png" /></image>
-            </ImageView>
-          </graphic>
-        </Button>
-        <Button fx:id="captureBtn" graphicTextGap="10.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#scan" styleClass="scanButton, ceinScanAction, ceinScanPrimary" text="%capture">
-          <graphic>
-            <ImageView fx:id="captureImageView" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/scan.png" /></image>
-            </ImageView>
-          </graphic>
-        </Button>
-        <!-- CEIN: load a document from disk (PDF / image) -->
-        <Button fx:id="browseBtn" graphicTextGap="10.0" managed="${browseBtn.visible}" maxWidth="Infinity" mnemonicParsing="false" onAction="#browseFile" styleClass="scanButton, ceinScanAction" text="%browse">
-          <graphic>
-            <ImageView fx:id="browseImageView" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/browse.png" /></image>
-            </ImageView>
-          </graphic>
-        </Button>
-
-        <Separator styleClass="ceinScanSeparator" />
-        <Label styleClass="ceinEyebrow" text="%ceinScanPages" />
-        <Button fx:id="previewBtn" graphicTextGap="10.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#preview" styleClass="scanButton, ceinScanAction" text="%view">
-          <graphic>
-            <ImageView fx:id="previewImageView" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/hover.png" /></image>
-            </ImageView>
-          </graphic>
-        </Button>
-        <Button fx:id="cropButton" graphicTextGap="10.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#crop" styleClass="scanButton, ceinScanAction" text="%crop">
-          <graphic>
-            <ImageView fx:id="backImageView1" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/crop.png" /></image>
-            </ImageView>
-          </graphic>
-        </Button>
-        <Button fx:id="cancelBtn" graphicTextGap="10.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancel" styleClass="scanButton, ceinScanAction, ceinScanDanger" text="%ceinDeletePage">
-          <graphic>
-            <ImageView fx:id="cancelImageView" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/Reject.png" /></image>
-            </ImageView>
-          </graphic>
-        </Button>
-
-        <Text fx:id="scanningMsg" styleClass="alertContext, ceinScanMessage" wrappingWidth="230.0" />
-
-        <Region VBox.vgrow="ALWAYS" />
-
-        <Button fx:id="saveBtn" graphicTextGap="10.0" maxWidth="Infinity" mnemonicParsing="false" onAction="#save" styleClass="contiuneButton, ceinScanSave" text="%save">
-          <graphic>
-            <ImageView fx:id="saveImageView" managed="false" visible="false" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-              <image><Image url="@../images_cein/DownloadPreRegData.png" /></image>
-            </ImageView>
+            <ImageView fx:id="saveImageView" fitHeight="1.0" fitWidth="1.0" managed="false" pickOnBounds="true" preserveRatio="true" visible="false" />
           </graphic>
         </Button>
       </children>
-    </VBox>
+    </HBox>
   </children>
-</GridPane>
+</VBox>
