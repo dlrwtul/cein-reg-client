@@ -9,7 +9,7 @@ Client d'enregistrement MOSIP customisé pour la CEIN (Sénégal).
 | Amont | [mosip/registration-client](https://github.com/mosip/registration-client) |
 | Version | **1.2.0.2** (dernière version stable de la ligne LTS 1.2.0.x) |
 | Commit amont | `84eb683b93bbe0c34f10d714fb16ad3bcb99dae7` (« [DSD-4982] 1.2.0.2 release changes », 1 commit après le tag `v1.2.0.2`) |
-| Tag local | `upstream/v1.2.0.2` = import brut de l'amont, sans customisation |
+| Import amont | commit `4f8bfb2` « Import upstream mosip/registration-client v1.2.0.2 » = amont brut, sans customisation (tag local `upstream/v1.2.0.2`, non poussé) |
 | JDK de build | 11 (le JAR de référence a été compilé avec 11.0.25) |
 
 Pourquoi pas une version plus récente : depuis 1.2.0.2, la branche `release-1.2.0.x`
@@ -34,7 +34,7 @@ Aucun autre fichier ne diffère. Les autres modules (`registration-services`,
 
 ## Delta par rapport à MOSIP 1.2.0.2
 
-Chaque point correspond à un commit (`git log upstream/v1.2.0.2..`).
+Chaque point correspond à un commit (`git log 4f8bfb2..`).
 
 ### 1. Français forcé comme langue unique
 - `controller/Initialization.java` : au démarrage, positionne des propriétés système
@@ -76,7 +76,7 @@ Chaque point correspond à un commit (`git log upstream/v1.2.0.2..`).
 Certaines images présentes dans le JAR livré ne sont référencées nulle part et ne sont pas reprises :
 `browse2.png`, `LoginBackGroundOri.png`, `logo-final_ori.png` et `logo-final-small_ori.png`.
 Les trois `*Ori*/*_ori*` sont des copies des images MOSIP d'origine, toujours disponibles
-via `git show upstream/v1.2.0.2:<chemin>`.
+via `git show 4f8bfb2:<chemin>`.
 
 ## Build
 
